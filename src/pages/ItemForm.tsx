@@ -240,37 +240,40 @@ function ImageField({
       <label className="mb-3 block text-xs font-semibold uppercase tracking-wide text-slate-400">
         {label}
       </label>
-      <div className="flex aspect-square items-center justify-center overflow-hidden rounded-md bg-slate-50">
+      <label className="group relative flex aspect-square cursor-pointer items-center justify-center overflow-hidden rounded-md bg-slate-50">
         {url ? (
           <img src={url} alt={label} className="h-full w-full object-contain" />
         ) : (
-          <ImageOff size={28} className="text-slate-300" />
+          <div className="flex flex-col items-center gap-2 text-slate-300 group-hover:text-blue-400">
+            <ImageOff size={28} />
+            <span className="text-xs font-medium">Kliko për të ngarkuar</span>
+          </div>
         )}
-      </div>
-      <div className="mt-3 flex items-center gap-2">
-        <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
-          <Upload size={14} />
-          Ngarko
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) onChange(file);
-            }}
-          />
-        </label>
         {url && (
-          <button
-            type="button"
-            onClick={() => onChange(undefined)}
-            className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-500 hover:bg-slate-50"
-          >
-            Hiq
-          </button>
+          <div className="absolute inset-0 hidden items-center justify-center gap-2 bg-black/40 text-xs font-medium text-white group-hover:flex">
+            <Upload size={14} />
+            Ndrysho imazhin
+          </div>
         )}
-      </div>
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) onChange(file);
+          }}
+        />
+      </label>
+      {url && (
+        <button
+          type="button"
+          onClick={() => onChange(undefined)}
+          className="mt-3 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-500 hover:bg-slate-50"
+        >
+          Hiq imazhin
+        </button>
+      )}
     </div>
   );
 }
