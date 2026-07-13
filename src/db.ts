@@ -1,4 +1,4 @@
-import type { Item } from './types';
+import { normalizeItem, type Item } from './types';
 
 const DB_NAME = 'artikuj-db';
 const STORE = 'items';
@@ -24,7 +24,7 @@ export async function getAllItems(): Promise<Item[]> {
     const tx = db.transaction(STORE, 'readonly');
     const store = tx.objectStore(STORE);
     const req = store.getAll();
-    req.onsuccess = () => resolve(req.result as Item[]);
+    req.onsuccess = () => resolve((req.result as Item[]).map(normalizeItem));
     req.onerror = () => reject(req.error);
   });
 }
@@ -35,7 +35,10 @@ export async function getItem(id: string): Promise<Item | undefined> {
     const tx = db.transaction(STORE, 'readonly');
     const store = tx.objectStore(STORE);
     const req = store.get(id);
-    req.onsuccess = () => resolve(req.result as Item | undefined);
+    req.onsuccess = () => {
+      const result = req.result as Item | undefined;
+      resolve(result ? normalizeItem(result) : undefined);
+    };
     req.onerror = () => reject(req.error);
   });
 }

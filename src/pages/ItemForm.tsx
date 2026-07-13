@@ -3,16 +3,9 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { ArrowLeft, ImageOff, Save, Upload } from 'lucide-react';
 import { getAllItems, getItem, saveItem } from '../db';
-import { emptySizeTable, type Item, type SizeRow } from '../types';
+import { defaultSizeTable, type Item, type SizeTable } from '../types';
 import { useObjectUrl } from '../hooks/useObjectUrl';
-
-const SIZE_LABELS: Record<string, string> = {
-  supi: 'Supi',
-  gjeresiaGjoksit: 'Gjerësia e gjoksit',
-  mengesia: 'Mëngë',
-  gjatesia: 'Gjatësia',
-  fundi: 'Fundi (poshtë)',
-};
+import SizeTableEditor from '../components/SizeTableEditor';
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -31,7 +24,7 @@ export default function ItemForm() {
   const [pelhura, setPelhura] = useState('');
   const [imazhi, setImazhi] = useState<Blob | undefined>(undefined);
   const [skicaTeknike, setSkicaTeknike] = useState<Blob | undefined>(undefined);
-  const [tabelaMasave, setTabelaMasave] = useState<SizeRow[]>(emptySizeTable());
+  const [tabelaMasave, setTabelaMasave] = useState<SizeTable>(defaultSizeTable());
   const [toleranca, setToleranca] = useState('± 1 cm, përveç rasteve të specifikuara ndryshe.');
   const [krijuarNe, setKrijuarNe] = useState('');
   const [loading, setLoading] = useState(isEdit);
@@ -65,12 +58,6 @@ export default function ItemForm() {
       });
     }
   }, [isEdit, id]);
-
-  function updateSize(size: string, field: keyof SizeRow, value: string) {
-    setTabelaMasave((rows) =>
-      rows.map((row) => (row.size === size ? { ...row, [field]: value } : row)),
-    );
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -185,36 +172,7 @@ export default function ItemForm() {
           <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-400">
             Tabela e Masave (cm)
           </p>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-left text-sm">
-              <thead>
-                <tr className="text-xs font-semibold text-slate-500">
-                  <th className="px-2 py-2">Masa</th>
-                  {Object.values(SIZE_LABELS).map((label) => (
-                    <th key={label} className="px-2 py-2">
-                      {label}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {tabelaMasave.map((row) => (
-                  <tr key={row.size} className="border-t border-slate-100">
-                    <td className="px-2 py-2 font-semibold text-blue-600">{row.size}</td>
-                    {(Object.keys(SIZE_LABELS) as (keyof typeof SIZE_LABELS)[]).map((field) => (
-                      <td key={field} className="px-2 py-1.5">
-                        <input
-                          value={row[field as keyof SizeRow] as string}
-                          onChange={(e) => updateSize(row.size, field as keyof SizeRow, e.target.value)}
-                          className="w-20 rounded border border-slate-200 px-2 py-1.5 text-sm outline-none focus:border-blue-400"
-                        />
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <SizeTableEditor table={tabelaMasave} onChange={setTabelaMasave} />
 
           <div className="mt-4">
             <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">

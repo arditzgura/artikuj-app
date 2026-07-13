@@ -143,22 +143,22 @@ export default function ItemCard() {
               <thead>
                 <tr className="bg-slate-50 text-xs font-semibold tracking-wide text-slate-500">
                   <th className="px-4 py-2.5">Masa</th>
-                  <th className="px-4 py-2.5">Supi</th>
-                  <th className="px-4 py-2.5">Gjerësia e gjoksit</th>
-                  <th className="px-4 py-2.5">Mëngë</th>
-                  <th className="px-4 py-2.5">Gjatësia</th>
-                  <th className="px-4 py-2.5">Fundi (poshtë)</th>
+                  {item.tabelaMasave.columns.map((col) => (
+                    <th key={col.id} className="px-4 py-2.5">
+                      {col.label || '—'}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {item.tabelaMasave.map((row) => (
-                  <tr key={row.size} className="border-t border-slate-100">
-                    <td className="px-4 py-2.5 font-semibold text-blue-600">{row.size}</td>
-                    <td className="px-4 py-2.5 text-slate-700">{row.supi || '—'}</td>
-                    <td className="px-4 py-2.5 text-slate-700">{row.gjeresiaGjoksit || '—'}</td>
-                    <td className="px-4 py-2.5 text-slate-700">{row.mengesia || '—'}</td>
-                    <td className="px-4 py-2.5 text-slate-700">{row.gjatesia || '—'}</td>
-                    <td className="px-4 py-2.5 text-slate-700">{row.fundi || '—'}</td>
+                {item.tabelaMasave.rows.map((row) => (
+                  <tr key={row.id} className="border-t border-slate-100">
+                    <td className="px-4 py-2.5 font-semibold text-blue-600">{row.label || '—'}</td>
+                    {item.tabelaMasave.columns.map((col) => (
+                      <td key={col.id} className="px-4 py-2.5 text-slate-700">
+                        {row.values[col.id] || '—'}
+                      </td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
