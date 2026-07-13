@@ -1,14 +1,25 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, PackagePlus, Boxes, Trash2 } from 'lucide-react';
+import { Search, PackagePlus, Boxes, Trash2, LayoutGrid, List } from 'lucide-react';
 import { deleteItem, getAllItems } from '../db';
 import type { Item } from '../types';
 import ItemThumb from '../components/ItemThumb';
+
+type ViewMode = 'grid' | 'list';
+const VIEW_MODE_KEY = 'artikuj-view-mode';
 
 export default function ItemsList() {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    () => (localStorage.getItem(VIEW_MODE_KEY) as ViewMode) || 'grid',
+  );
+
+  function changeViewMode(mode: ViewMode) {
+    setViewMode(mode);
+    localStorage.setItem(VIEW_MODE_KEY, mode);
+  }
 
   function load() {
     setLoading(true);
@@ -53,13 +64,37 @@ export default function ItemsList() {
             Të gjithë artikujt e ruajtur me kartat përkatëse
           </p>
         </div>
-        <Link
-          to="/artikuj/ri"
-          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          <PackagePlus size={16} />
-          Artikull i Ri
-        </Link>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center rounded-lg border border-slate-200 bg-white p-0.5">
+            <button
+              type="button"
+              onClick={() => changeViewMode('list')}
+              title="Pamja listë"
+              className={`rounded-md p-1.5 ${
+                viewMode === 'list' ? 'bg-slate-900 text-white' : 'text-slate-400 hover:text-slate-700'
+              }`}
+            >
+              <List size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={() => changeViewMode('grid')}
+              title="Pamja grid"
+              className={`rounded-md p-1.5 ${
+                viewMode === 'grid' ? 'bg-slate-900 text-white' : 'text-slate-400 hover:text-slate-700'
+              }`}
+            >
+              <LayoutGrid size={16} />
+            </button>
+          </div>
+          <Link
+            to="/artikuj/ri"
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            <PackagePlus size={16} />
+            Artikull i Ri
+          </Link>
+        </div>
       </div>
 
       <div className="mb-6 flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2">
@@ -86,7 +121,7 @@ export default function ItemsList() {
             </Link>
           )}
         </div>
-      ) : (
+      ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {filtered.map((item) => (
             <Link
@@ -111,31 +146,67 @@ export default function ItemsList() {
                   </button>
                 </div>
                 <span className="font-mono text-[11px] text-slate-400">{item.kodi}</span>
-                <div className="mt-1 flex items-center gap-1.5">
-                  {item.ngjyrat.length > 0 ? (
-                    <>
-                      <div className="flex -space-x-1">
-                        {item.ngjyrat.slice(0, 4).map((color) => (
-                          <span
-                            key={color.id}
-                            className="h-3 w-3 rounded-full border border-white ring-1 ring-slate-200"
-                            style={{ backgroundColor: color.hex || '#e5e7eb' }}
-                          />
-                        ))}
-                      </div>
-                      <span className="truncate text-xs text-slate-500">
-                        {item.ngjyrat.map((c) => c.emri).filter(Boolean).join(', ') || '—'}
-                      </span>
-                    </>
-                  ) : (
-                    <span className="truncate text-xs text-slate-500">—</span>
-                  )}
-                </div>
+                <ColorSummary item={item} />
               </div>
             </Link>
           ))}
         </div>
+      ) : (
+        <div className="flex flex-col divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white">
+          {filtered.map((item) => (
+            <Link
+              key={item.id}
+              to={`/artikuj/${item.id}`}
+              className="group flex items-center gap-4 px-4 py-3 hover:bg-slate-50"
+            >
+              <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-slate-50">
+                <ItemThumb blob={item.imazhi} alt={item.emriArtikullit} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="truncate text-sm font-semibold text-slate-800">
+                    {item.emriArtikullit || 'Pa emër'}
+                  </span>
+                  <span className="shrink-0 font-mono text-[11px] text-slate-400">{item.kodi}</span>
+                </div>
+                <p className="truncate text-xs text-slate-500">{item.pelhura || '—'}</p>
+              </div>
+              <div className="hidden shrink-0 sm:block">
+                <ColorSummary item={item} />
+              </div>
+              <button
+                onClick={(e) => handleDelete(e, item.id)}
+                className="shrink-0 rounded p-1.5 text-slate-300 hover:bg-red-50 hover:text-red-500"
+                title="Fshi"
+              >
+                <Trash2 size={14} />
+              </button>
+            </Link>
+          ))}
+        </div>
       )}
+    </div>
+  );
+}
+
+function ColorSummary({ item }: { item: Item }) {
+  if (item.ngjyrat.length === 0) {
+    return <span className="text-xs text-slate-400">—</span>;
+  }
+  return (
+    <div className="mt-1 flex items-center gap-1.5">
+      <div className="flex -space-x-1">
+        {item.ngjyrat.slice(0, 4).map((color) => (
+          <span
+            key={color.id}
+            className="h-3 w-3 rounded-full border border-white ring-1 ring-slate-200"
+            style={{ backgroundColor: color.hex || '#e5e7eb' }}
+          />
+        ))}
+      </div>
+      <span className="truncate text-xs text-slate-500">
+        {item.ngjyrat.map((c) => c.emri).filter(Boolean).join(', ') || '—'}
+      </span>
     </div>
   );
 }
