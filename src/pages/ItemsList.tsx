@@ -19,6 +19,7 @@ import { deleteItem, getAllItems, saveItem } from '../db';
 import type { Item } from '../types';
 import ItemThumb from '../components/ItemThumb';
 import PreviewModal from '../components/PreviewModal';
+import ColorSwatch from '../components/ColorSwatch';
 
 type ViewMode = 'grid' | 'list';
 const VIEW_MODE_KEY = 'artikuj-view-mode';
@@ -357,10 +358,12 @@ function ColorSummary({ item }: { item: Item }) {
     <div className="mt-1 flex items-center gap-1.5">
       <div className="flex -space-x-1">
         {item.ngjyrat.slice(0, 4).map((color) => (
-          <span
+          <ColorSwatch
             key={color.id}
-            className="h-3 w-3 rounded-full border border-white ring-1 ring-slate-200"
-            style={{ backgroundColor: color.hex || '#e5e7eb' }}
+            hex={color.hex}
+            size={12}
+            borderColor="#fff"
+            className="ring-1 ring-slate-200"
           />
         ))}
       </div>

@@ -3,9 +3,18 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { ArrowLeft, ImageOff, Plus, Save, Upload, X } from 'lucide-react';
 import { getAllItems, getItem, saveItem } from '../db';
-import { defaultSizeTable, emptyColorEntry, type ColorEntry, type Item, type SizeTable } from '../types';
+import {
+  defaultSizeTable,
+  emptyColorEntry,
+  makeId,
+  PRESET_COLORS,
+  type ColorEntry,
+  type Item,
+  type SizeTable,
+} from '../types';
 import { useObjectUrl } from '../hooks/useObjectUrl';
 import SizeTableEditor from '../components/SizeTableEditor';
+import ColorSwatch from '../components/ColorSwatch';
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -19,7 +28,7 @@ export default function ItemForm() {
   const [kodi, setKodi] = useState('');
   const [data, setData] = useState(todayIso());
   const [emriArtikullit, setEmriArtikullit] = useState('');
-  const [ngjyrat, setNgjyrat] = useState<ColorEntry[]>([emptyColorEntry()]);
+  const [ngjyrat, setNgjyrat] = useState<ColorEntry[]>([]);
   const [pelhura, setPelhura] = useState('');
   const [pelhuraSuggestions, setPelhuraSuggestions] = useState<string[]>([]);
   const [imazhi, setImazhi] = useState<Blob | undefined>(undefined);
@@ -49,7 +58,7 @@ export default function ItemForm() {
           setKodi(item.kodi);
           setData(item.data);
           setEmriArtikullit(item.emriArtikullit);
-          setNgjyrat(item.ngjyrat.length ? item.ngjyrat : [emptyColorEntry()]);
+          setNgjyrat(item.ngjyrat);
           setPelhura(item.pelhura);
           setImazhi(item.imazhi);
           setSkicaTeknike(item.skicaTeknike);
@@ -66,6 +75,14 @@ export default function ItemForm() {
     setNgjyrat((colors) => [...colors, emptyColorEntry()]);
   }
 
+  function togglePreset(preset: { emri: string; hex: string }) {
+    setNgjyrat((colors) => {
+      const idx = colors.findIndex((c) => c.emri.trim().toLowerCase() === preset.emri.toLowerCase());
+      if (idx >= 0) return colors.filter((_, i) => i !== idx);
+      return [...colors, { id: makeId(), emri: preset.emri, hex: preset.hex }];
+    });
+  }
+
   function removeColor(colorId: string) {
     setNgjyrat((colors) => colors.filter((c) => c.id !== colorId));
   }
@@ -73,6 +90,9 @@ export default function ItemForm() {
   function updateColor(colorId: string, patch: Partial<ColorEntry>) {
     setNgjyrat((colors) => colors.map((c) => (c.id === colorId ? { ...c, ...patch } : c)));
   }
+
+  const presetNames = new Set(PRESET_COLORS.map((p) => p.emri.toLowerCase()));
+  const manualColors = ngjyrat.filter((c) => !presetNames.has(c.emri.trim().toLowerCase()));
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -143,41 +163,67 @@ export default function ItemForm() {
               required
             />
           </Field>
-          <Field label="Ngjyrat" full>
-            <div className="space-y-2">
-              {ngjyrat.map((color) => (
-                <div key={color.id} className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={color.hex}
-                    onChange={(e) => updateColor(color.id, { hex: e.target.value })}
-                    className="h-10 w-12 shrink-0 cursor-pointer rounded border border-slate-200"
-                  />
-                  <input
-                    value={color.emri}
-                    onChange={(e) => updateColor(color.id, { emri: e.target.value })}
-                    className="input"
-                    placeholder="p.sh. Blu Marino"
-                  />
+          <Field label="Ngjyrat e Disponueshme" full>
+            <div className="flex flex-wrap gap-2">
+              {PRESET_COLORS.map((preset) => {
+                const selected = ngjyrat.some(
+                  (c) => c.emri.trim().toLowerCase() === preset.emri.toLowerCase(),
+                );
+                return (
                   <button
+                    key={preset.emri}
                     type="button"
-                    onClick={() => removeColor(color.id)}
-                    className="shrink-0 rounded-lg p-2 text-slate-300 hover:bg-red-50 hover:text-red-500"
-                    title="Fshi ngjyrën"
+                    onClick={() => togglePreset(preset)}
+                    className={`flex items-center gap-2 rounded-full border-2 px-3 py-1.5 text-sm font-medium transition-colors ${
+                      selected
+                        ? 'border-pink-500 text-slate-900'
+                        : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                    }`}
                   >
-                    <X size={16} />
+                    <ColorSwatch hex={preset.hex} size={16} />
+                    {preset.emri}
                   </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={addColor}
-                className="flex items-center gap-1 rounded-lg border border-dashed border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-500 hover:border-blue-400 hover:text-blue-600"
-              >
-                <Plus size={13} />
-                Shto Ngjyrë
-              </button>
+                );
+              })}
             </div>
+
+            {manualColors.length > 0 && (
+              <div className="mt-3 space-y-2">
+                {manualColors.map((color) => (
+                  <div key={color.id} className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={color.hex}
+                      onChange={(e) => updateColor(color.id, { hex: e.target.value })}
+                      className="h-10 w-12 shrink-0 cursor-pointer rounded border border-slate-200"
+                    />
+                    <input
+                      value={color.emri}
+                      onChange={(e) => updateColor(color.id, { emri: e.target.value })}
+                      className="input"
+                      placeholder="p.sh. Blu Marino"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeColor(color.id)}
+                      className="shrink-0 rounded-lg p-2 text-slate-300 hover:bg-red-50 hover:text-red-500"
+                      title="Fshi ngjyrën"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={addColor}
+              className="mt-3 flex items-center gap-1 rounded-lg border border-dashed border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-500 hover:border-blue-400 hover:text-blue-600"
+            >
+              <Plus size={13} />
+              Shto Ngjyrë Manualisht
+            </button>
           </Field>
           <Field label="Pëlhura" full>
             <input

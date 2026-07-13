@@ -40,6 +40,21 @@ export function emptyColorEntry(): ColorEntry {
   return { id: makeId(), emri: '', hex: '#2563eb' };
 }
 
+// Sentinel hex value for the "multi-color" swatch, rendered as a gradient.
+export const MULTI_COLOR = 'multi';
+
+export const PRESET_COLORS: { emri: string; hex: string }[] = [
+  { emri: 'E Bardhë', hex: '#ffffff' },
+  { emri: 'Gri', hex: '#9ca3af' },
+  { emri: 'E Zezë', hex: '#18181b' },
+  { emri: 'Bezhe', hex: '#d9c2a1' },
+  { emri: 'Gri e Errët', hex: '#3f3f46' },
+  { emri: 'Blu', hex: '#2563eb' },
+  { emri: 'Bojëqiell', hex: '#38bdf8' },
+  { emri: 'Jeshile', hex: '#16a34a' },
+  { emri: 'Shumëngjyresh', hex: MULTI_COLOR },
+];
+
 const DEFAULT_PART_LABELS = ['Supi', 'Gjerësia e gjoksit', 'Mëngë', 'Gjatësia', 'Fundi (poshtë)'];
 const DEFAULT_SIZE_LABELS = ['S', 'M', 'L', 'XL', 'XXL', '3XL'];
 

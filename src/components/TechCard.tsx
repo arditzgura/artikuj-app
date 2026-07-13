@@ -1,6 +1,7 @@
 import { ImageOff } from 'lucide-react';
 import type { Item } from '../types';
 import { useObjectUrl } from '../hooks/useObjectUrl';
+import ColorSwatch from './ColorSwatch';
 
 export function formatDate(iso: string) {
   if (!iso) return '—';
@@ -57,10 +58,7 @@ export default function TechCard({ item }: { item: Item }) {
             <div className="space-y-1">
               {item.ngjyrat.map((color) => (
                 <div key={color.id} className="flex items-center gap-2">
-                  <span
-                    className="h-3.5 w-3.5 shrink-0 rounded-full border border-slate-200"
-                    style={{ backgroundColor: color.hex || '#e5e7eb' }}
-                  />
+                  <ColorSwatch hex={color.hex} size={14} />
                   <span className="text-sm text-slate-800">{color.emri || '—'}</span>
                 </div>
               ))}
