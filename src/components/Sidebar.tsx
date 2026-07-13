@@ -8,7 +8,7 @@ const navItems = [
 
 export default function Sidebar() {
   return (
-    <aside className="flex h-full w-60 shrink-0 flex-col border-r border-slate-200 bg-white">
+    <aside className="flex h-full w-60 shrink-0 flex-col border-r border-slate-200 bg-white print:hidden">
       <div className="flex items-center gap-2 px-5 py-5">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900 text-white">
           <Shirt size={18} />

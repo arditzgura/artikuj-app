@@ -7,9 +7,9 @@ import ItemForm from './pages/ItemForm';
 
 export default function App() {
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-slate-50 text-slate-900">
+    <div className="flex h-screen w-screen overflow-hidden bg-slate-50 text-slate-900 print:h-auto print:w-auto print:overflow-visible">
       <Sidebar />
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto print:overflow-visible">
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/artikuj" element={<ItemsList />} />
