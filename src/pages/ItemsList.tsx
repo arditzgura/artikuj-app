@@ -39,7 +39,7 @@ export default function ItemsList() {
     return (
       item.emriArtikullit.toLowerCase().includes(q) ||
       item.kodi.toLowerCase().includes(q) ||
-      item.ngjyra.toLowerCase().includes(q) ||
+      item.ngjyrat.some((c) => c.emri.toLowerCase().includes(q)) ||
       item.pelhura.toLowerCase().includes(q)
     );
   });
@@ -111,14 +111,25 @@ export default function ItemsList() {
                   </button>
                 </div>
                 <span className="font-mono text-[11px] text-slate-400">{item.kodi}</span>
-                <div className="mt-1 flex items-center gap-2">
-                  {item.ngjyraHex && (
-                    <span
-                      className="h-3 w-3 rounded-full border border-slate-200"
-                      style={{ backgroundColor: item.ngjyraHex }}
-                    />
+                <div className="mt-1 flex items-center gap-1.5">
+                  {item.ngjyrat.length > 0 ? (
+                    <>
+                      <div className="flex -space-x-1">
+                        {item.ngjyrat.slice(0, 4).map((color) => (
+                          <span
+                            key={color.id}
+                            className="h-3 w-3 rounded-full border border-white ring-1 ring-slate-200"
+                            style={{ backgroundColor: color.hex || '#e5e7eb' }}
+                          />
+                        ))}
+                      </div>
+                      <span className="truncate text-xs text-slate-500">
+                        {item.ngjyrat.map((c) => c.emri).filter(Boolean).join(', ') || '—'}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="truncate text-xs text-slate-500">—</span>
                   )}
-                  <span className="truncate text-xs text-slate-500">{item.ngjyra || '—'}</span>
                 </div>
               </div>
             </Link>

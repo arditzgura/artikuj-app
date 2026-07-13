@@ -97,13 +97,21 @@ export default function ItemCard() {
             <p className="text-[11px] font-semibold tracking-wide text-slate-400">EMRI I ARTIKULLIT</p>
             <p className="mb-3 text-sm font-semibold text-slate-900">{item.emriArtikullit || '—'}</p>
 
-            <p className="text-[11px] font-semibold tracking-wide text-slate-400">NGJYRA</p>
-            <div className="mb-3 flex items-center gap-2">
-              <span
-                className="h-3.5 w-3.5 rounded-full border border-slate-200"
-                style={{ backgroundColor: item.ngjyraHex || '#e5e7eb' }}
-              />
-              <span className="text-sm text-slate-800">{item.ngjyra || '—'}</span>
+            <p className="text-[11px] font-semibold tracking-wide text-slate-400">NGJYRAT</p>
+            <div className="mb-3 space-y-1">
+              {item.ngjyrat.length === 0 ? (
+                <span className="text-sm text-slate-800">—</span>
+              ) : (
+                item.ngjyrat.map((color) => (
+                  <div key={color.id} className="flex items-center gap-2">
+                    <span
+                      className="h-3.5 w-3.5 shrink-0 rounded-full border border-slate-200"
+                      style={{ backgroundColor: color.hex || '#e5e7eb' }}
+                    />
+                    <span className="text-sm text-slate-800">{color.emri || '—'}</span>
+                  </div>
+                ))
+              )}
             </div>
 
             <p className="text-[11px] font-semibold tracking-wide text-slate-400">PËLHURA</p>

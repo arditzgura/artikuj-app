@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import { ArrowLeft, ImageOff, Save, Upload } from 'lucide-react';
+import { ArrowLeft, ImageOff, Plus, Save, Upload, X } from 'lucide-react';
 import { getAllItems, getItem, saveItem } from '../db';
-import { defaultSizeTable, type Item, type SizeTable } from '../types';
+import { defaultSizeTable, emptyColorEntry, type ColorEntry, type Item, type SizeTable } from '../types';
 import { useObjectUrl } from '../hooks/useObjectUrl';
 import SizeTableEditor from '../components/SizeTableEditor';
 
@@ -19,9 +19,9 @@ export default function ItemForm() {
   const [kodi, setKodi] = useState('');
   const [data, setData] = useState(todayIso());
   const [emriArtikullit, setEmriArtikullit] = useState('');
-  const [ngjyra, setNgjyra] = useState('');
-  const [ngjyraHex, setNgjyraHex] = useState('#2563eb');
+  const [ngjyrat, setNgjyrat] = useState<ColorEntry[]>([emptyColorEntry()]);
   const [pelhura, setPelhura] = useState('');
+  const [pelhuraSuggestions, setPelhuraSuggestions] = useState<string[]>([]);
   const [imazhi, setImazhi] = useState<Blob | undefined>(undefined);
   const [skicaTeknike, setSkicaTeknike] = useState<Blob | undefined>(undefined);
   const [tabelaMasave, setTabelaMasave] = useState<SizeTable>(defaultSizeTable());
@@ -34,14 +34,22 @@ export default function ItemForm() {
   const sketchUrl = useObjectUrl(skicaTeknike);
 
   useEffect(() => {
+    getAllItems().then((items) => {
+      const fabrics = new Set(items.map((i) => i.pelhura.trim()).filter(Boolean));
+      setPelhuraSuggestions(Array.from(fabrics).sort());
+
+      if (!isEdit) {
+        setKodi(`ART-${String(items.length + 1).padStart(4, '0')}`);
+      }
+    });
+
     if (isEdit && id) {
       getItem(id).then((item) => {
         if (item) {
           setKodi(item.kodi);
           setData(item.data);
           setEmriArtikullit(item.emriArtikullit);
-          setNgjyra(item.ngjyra);
-          setNgjyraHex(item.ngjyraHex || '#2563eb');
+          setNgjyrat(item.ngjyrat.length ? item.ngjyrat : [emptyColorEntry()]);
           setPelhura(item.pelhura);
           setImazhi(item.imazhi);
           setSkicaTeknike(item.skicaTeknike);
@@ -51,13 +59,20 @@ export default function ItemForm() {
         }
         setLoading(false);
       });
-    } else {
-      getAllItems().then((items) => {
-        const next = items.length + 1;
-        setKodi(`ART-${String(next).padStart(4, '0')}`);
-      });
     }
   }, [isEdit, id]);
+
+  function addColor() {
+    setNgjyrat((colors) => [...colors, emptyColorEntry()]);
+  }
+
+  function removeColor(colorId: string) {
+    setNgjyrat((colors) => colors.filter((c) => c.id !== colorId));
+  }
+
+  function updateColor(colorId: string, patch: Partial<ColorEntry>) {
+    setNgjyrat((colors) => colors.map((c) => (c.id === colorId ? { ...c, ...patch } : c)));
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -68,8 +83,7 @@ export default function ItemForm() {
       kodi,
       data,
       emriArtikullit,
-      ngjyra,
-      ngjyraHex,
+      ngjyrat,
       pelhura,
       imazhi,
       skicaTeknike,
@@ -129,29 +143,55 @@ export default function ItemForm() {
               required
             />
           </Field>
-          <Field label="Ngjyra">
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={ngjyraHex}
-                onChange={(e) => setNgjyraHex(e.target.value)}
-                className="h-10 w-12 shrink-0 cursor-pointer rounded border border-slate-200"
-              />
-              <input
-                value={ngjyra}
-                onChange={(e) => setNgjyra(e.target.value)}
-                className="input"
-                placeholder="p.sh. Blu Marino"
-              />
+          <Field label="Ngjyrat" full>
+            <div className="space-y-2">
+              {ngjyrat.map((color) => (
+                <div key={color.id} className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={color.hex}
+                    onChange={(e) => updateColor(color.id, { hex: e.target.value })}
+                    className="h-10 w-12 shrink-0 cursor-pointer rounded border border-slate-200"
+                  />
+                  <input
+                    value={color.emri}
+                    onChange={(e) => updateColor(color.id, { emri: e.target.value })}
+                    className="input"
+                    placeholder="p.sh. Blu Marino"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeColor(color.id)}
+                    className="shrink-0 rounded-lg p-2 text-slate-300 hover:bg-red-50 hover:text-red-500"
+                    title="Fshi ngjyrën"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addColor}
+                className="flex items-center gap-1 rounded-lg border border-dashed border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-500 hover:border-blue-400 hover:text-blue-600"
+              >
+                <Plus size={13} />
+                Shto Ngjyrë
+              </button>
             </div>
           </Field>
-          <Field label="Pëlhura">
+          <Field label="Pëlhura" full>
             <input
               value={pelhura}
               onChange={(e) => setPelhura(e.target.value)}
               className="input"
               placeholder="p.sh. 100% Pambuk, Oxford 130 g/m²"
+              list="pelhura-suggestions"
             />
+            <datalist id="pelhura-suggestions">
+              {pelhuraSuggestions.map((f) => (
+                <option key={f} value={f} />
+              ))}
+            </datalist>
           </Field>
         </div>
 

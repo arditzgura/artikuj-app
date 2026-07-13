@@ -15,13 +15,18 @@ export interface SizeTable {
   version: 2;
 }
 
+export interface ColorEntry {
+  id: string;
+  emri: string;
+  hex: string;
+}
+
 export interface Item {
   id: string;
   kodi: string;
   data: string;
   emriArtikullit: string;
-  ngjyra: string;
-  ngjyraHex: string;
+  ngjyrat: ColorEntry[];
   pelhura: string;
   imazhi?: Blob;
   skicaTeknike?: Blob;
@@ -29,6 +34,10 @@ export interface Item {
   toleranca: string;
   krijuarNe: string;
   perditesuarNe: string;
+}
+
+export function emptyColorEntry(): ColorEntry {
+  return { id: makeId(), emri: '', hex: '#2563eb' };
 }
 
 const DEFAULT_PART_LABELS = ['Supi', 'Gjerësia e gjoksit', 'Mëngë', 'Gjatësia', 'Fundi (poshtë)'];
@@ -92,6 +101,20 @@ function migrateSizeTable(raw: unknown): SizeTable {
   return defaultSizeTable();
 }
 
+// Older items stored a single ngjyra/ngjyraHex pair instead of a ngjyrat list.
+function migrateColors(raw: Item): ColorEntry[] {
+  if (Array.isArray(raw.ngjyrat)) return raw.ngjyrat;
+  const legacy = raw as unknown as { ngjyra?: string; ngjyraHex?: string };
+  if (legacy.ngjyra || legacy.ngjyraHex) {
+    return [{ id: makeId(), emri: legacy.ngjyra ?? '', hex: legacy.ngjyraHex ?? '#2563eb' }];
+  }
+  return [];
+}
+
 export function normalizeItem(raw: Item): Item {
-  return { ...raw, tabelaMasave: migrateSizeTable(raw.tabelaMasave) };
+  return {
+    ...raw,
+    tabelaMasave: migrateSizeTable(raw.tabelaMasave),
+    ngjyrat: migrateColors(raw),
+  };
 }

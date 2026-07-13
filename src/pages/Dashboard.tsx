@@ -21,7 +21,9 @@ export default function Dashboard() {
 
   const totalItems = items.length;
   const uniqueFabrics = new Set(items.map((i) => i.pelhura).filter(Boolean)).size;
-  const uniqueColors = new Set(items.map((i) => i.ngjyra).filter(Boolean)).size;
+  const uniqueColors = new Set(
+    items.flatMap((i) => i.ngjyrat.map((c) => c.emri)).filter(Boolean),
+  ).size;
   const recent = items.slice(0, 6);
 
   return (
