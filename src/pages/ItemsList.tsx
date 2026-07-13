@@ -1,7 +1,20 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import { Search, PackagePlus, Boxes, Trash2, LayoutGrid, List, Eye, Printer, Copy } from 'lucide-react';
+import {
+  Search,
+  PackagePlus,
+  Boxes,
+  Trash2,
+  LayoutGrid,
+  List,
+  Eye,
+  Printer,
+  Copy,
+  Check,
+  BookImage,
+  X,
+} from 'lucide-react';
 import { deleteItem, getAllItems, saveItem } from '../db';
 import type { Item } from '../types';
 import ItemThumb from '../components/ItemThumb';
@@ -16,6 +29,7 @@ export default function ItemsList() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [previewItem, setPreviewItem] = useState<Item | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<ViewMode>(
     () => (localStorage.getItem(VIEW_MODE_KEY) as ViewMode) || 'grid',
   );
@@ -73,6 +87,22 @@ export default function ItemsList() {
     navigate(`/artikuj/${clone.id}/edit`);
   }
 
+  function toggleSelect(e: React.MouseEvent, id: string) {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function handleCreateCatalog() {
+    const ids = Array.from(selected).join(',');
+    window.open(`${import.meta.env.BASE_URL}katalog?ids=${ids}&print=1`, '_blank');
+  }
+
   const filtered = items.filter((item) => {
     const q = query.trim().toLowerCase();
     if (!q) return true;
@@ -85,7 +115,7 @@ export default function ItemsList() {
   });
 
   return (
-    <div className="mx-auto max-w-6xl px-8 py-8">
+    <div className="mx-auto max-w-6xl px-8 py-8 pb-28">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900">Artikuj</h1>
@@ -158,8 +188,13 @@ export default function ItemsList() {
               to={`/artikuj/${item.id}`}
               className="group relative flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm"
             >
-              <div className="aspect-[4/3] bg-slate-50">
+              <div className="relative aspect-[4/3] bg-slate-50">
                 <ItemThumb blob={item.imazhi} alt={item.emriArtikullit} />
+                <SelectCircle
+                  checked={selected.has(item.id)}
+                  onClick={(e) => toggleSelect(e, item.id)}
+                  className="absolute left-2 top-2 bg-white/80 backdrop-blur-sm"
+                />
               </div>
               <div className="flex flex-1 flex-col gap-1 p-3">
                 <span className="truncate text-sm font-semibold text-slate-800">
@@ -186,6 +221,7 @@ export default function ItemsList() {
               to={`/artikuj/${item.id}`}
               className="group flex items-center gap-4 px-4 py-3 hover:bg-slate-50"
             >
+              <SelectCircle checked={selected.has(item.id)} onClick={(e) => toggleSelect(e, item.id)} />
               <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-slate-50">
                 <ItemThumb blob={item.imazhi} alt={item.emriArtikullit} />
               </div>
@@ -213,7 +249,56 @@ export default function ItemsList() {
       )}
 
       {previewItem && <PreviewModal item={previewItem} onClose={() => setPreviewItem(null)} />}
+
+      {selected.size > 0 && (
+        <div className="fixed inset-x-0 bottom-0 z-40 flex justify-center px-6 pb-6">
+          <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-lg">
+            <span className="text-sm font-medium text-slate-700">
+              {selected.size} {selected.size === 1 ? 'artikull i përzgjedhur' : 'artikuj të përzgjedhur'}
+            </span>
+            <button
+              onClick={() => setSelected(new Set())}
+              className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm text-slate-500 hover:bg-slate-100"
+            >
+              <X size={14} />
+              Pastro
+            </button>
+            <button
+              onClick={handleCreateCatalog}
+              className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              <BookImage size={16} />
+              Krijo Katalog PDF
+            </button>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+function SelectCircle({
+  checked,
+  onClick,
+  className = '',
+}: {
+  checked: boolean;
+  onClick: (e: React.MouseEvent) => void;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={checked ? 'Hiq nga përzgjedhja' : 'Zgjidh për katalog'}
+      className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+        checked
+          ? 'border-blue-600 bg-blue-600 text-white'
+          : 'border-slate-300 bg-white text-transparent hover:border-blue-400'
+      } ${className}`}
+    >
+      <Check size={14} strokeWidth={3} />
+    </button>
   );
 }
 

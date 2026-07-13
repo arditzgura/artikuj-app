@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import ItemsList from './pages/ItemsList';
 import ItemCard from './pages/ItemCard';
 import ItemForm from './pages/ItemForm';
+import Catalog from './pages/Catalog';
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
           <Route path="/artikuj/ri" element={<ItemForm />} />
           <Route path="/artikuj/:id" element={<ItemCard />} />
           <Route path="/artikuj/:id/edit" element={<ItemForm />} />
+          <Route path="/katalog" element={<Catalog />} />
         </Routes>
       </main>
     </div>
