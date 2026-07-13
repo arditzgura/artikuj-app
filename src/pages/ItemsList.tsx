@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -20,6 +20,7 @@ import type { Item } from '../types';
 import ItemThumb from '../components/ItemThumb';
 import PreviewModal from '../components/PreviewModal';
 import ColorSwatch from '../components/ColorSwatch';
+import TechCard from '../components/TechCard';
 
 type ViewMode = 'grid' | 'list';
 const VIEW_MODE_KEY = 'artikuj-view-mode';
@@ -34,6 +35,9 @@ export default function ItemsList() {
   const [viewMode, setViewMode] = useState<ViewMode>(
     () => (localStorage.getItem(VIEW_MODE_KEY) as ViewMode) || 'grid',
   );
+  const [exportItems, setExportItems] = useState<Item[]>([]);
+  const [exporting, setExporting] = useState(false);
+  const exportContainerRef = useRef<HTMLDivElement>(null);
 
   function changeViewMode(mode: ViewMode) {
     setViewMode(mode);
@@ -99,10 +103,51 @@ export default function ItemsList() {
     });
   }
 
-  function handleCreateCatalog() {
+  function handlePrintSelected() {
     const ids = Array.from(selected).join(',');
     window.open(`${import.meta.env.BASE_URL}katalog?ids=${ids}&print=1`, '_blank');
   }
+
+  function handleCreatePdf() {
+    const toExport = items.filter((i) => selected.has(i.id));
+    if (toExport.length === 0) return;
+    setExporting(true);
+    setExportItems(toExport);
+  }
+
+  useEffect(() => {
+    if (exportItems.length === 0) return;
+    let cancelled = false;
+
+    (async () => {
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import('html2canvas-pro'),
+        import('jspdf'),
+      ]);
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      const container = exportContainerRef.current;
+      if (!container) return;
+      const cards = Array.from(container.querySelectorAll<HTMLElement>(':scope > div'));
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+
+      for (let i = 0; i < cards.length; i++) {
+        const canvas = await html2canvas(cards[i], { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+      }
+
+      if (!cancelled) {
+        pdf.save('katalog.pdf');
+        setExportItems([]);
+        setExporting(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [exportItems]);
 
   const filtered = items.filter((item) => {
     const q = query.trim().toLowerCase();
@@ -264,16 +309,39 @@ export default function ItemsList() {
               <X size={14} />
               Pastro
             </button>
+            {selected.size > 1 && (
+              <button
+                onClick={handlePrintSelected}
+                className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              >
+                <Printer size={16} />
+                Printo
+              </button>
+            )}
             <button
-              onClick={handleCreateCatalog}
-              className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
+              onClick={handleCreatePdf}
+              disabled={exporting}
+              className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
             >
               <BookImage size={16} />
-              Krijo Katalog PDF
+              {exporting ? 'Duke krijuar PDF-në...' : 'Krijo Katalog PDF'}
             </button>
           </div>
         </div>
       )}
+
+      {/* Off-screen render used to capture each card as an image for the PDF export */}
+      <div
+        ref={exportContainerRef}
+        style={{ position: 'fixed', left: -99999, top: 0, pointerEvents: 'none' }}
+        aria-hidden="true"
+      >
+        {exportItems.map((item) => (
+          <div key={item.id}>
+            <TechCard item={item} />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
