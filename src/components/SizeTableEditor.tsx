@@ -11,6 +11,7 @@ export default function SizeTableEditor({
   function addColumn() {
     const col = { id: makeId(), label: '' };
     onChange({
+      ...table,
       columns: [...table.columns, col],
       rows: table.rows.map((row) => ({ ...row, values: { ...row.values, [col.id]: '' } })),
     });
@@ -18,6 +19,7 @@ export default function SizeTableEditor({
 
   function removeColumn(colId: string) {
     onChange({
+      ...table,
       columns: table.columns.filter((c) => c.id !== colId),
       rows: table.rows.map((row) => {
         const values = { ...row.values };
@@ -68,15 +70,15 @@ export default function SizeTableEditor({
       <table className="w-full min-w-[640px] text-left text-sm">
         <thead>
           <tr className="text-xs font-semibold text-slate-500">
-            <th className="px-2 py-2">Masa</th>
+            <th className="px-2 py-2">Pjesa</th>
             {table.columns.map((col) => (
               <th key={col.id} className="px-2 py-2">
                 <div className="flex items-center gap-1">
                   <input
                     value={col.label}
                     onChange={(e) => renameColumn(col.id, e.target.value)}
-                    placeholder="Emërtimi"
-                    className="w-28 rounded border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-600 outline-none focus:border-blue-400"
+                    placeholder="Masa"
+                    className="w-16 rounded border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-blue-600 outline-none focus:border-blue-400"
                   />
                   <button
                     type="button"
@@ -96,7 +98,7 @@ export default function SizeTableEditor({
                 className="flex items-center gap-1 rounded-lg border border-dashed border-slate-300 px-2 py-1.5 text-xs font-medium text-slate-500 hover:border-blue-400 hover:text-blue-600"
               >
                 <Plus size={13} />
-                Kolonë
+                Masë
               </button>
             </th>
           </tr>
@@ -108,8 +110,8 @@ export default function SizeTableEditor({
                 <input
                   value={row.label}
                   onChange={(e) => renameRow(row.id, e.target.value)}
-                  placeholder="Masa"
-                  className="w-16 rounded border border-slate-200 px-2 py-1.5 text-sm font-semibold text-blue-600 outline-none focus:border-blue-400"
+                  placeholder="Emërtimi"
+                  className="w-28 rounded border border-slate-200 px-2 py-1.5 text-sm font-semibold text-slate-600 outline-none focus:border-blue-400"
                 />
               </td>
               {table.columns.map((col) => (
@@ -142,7 +144,7 @@ export default function SizeTableEditor({
         className="mt-3 flex items-center gap-1 rounded-lg border border-dashed border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-500 hover:border-blue-400 hover:text-blue-600"
       >
         <Plus size={13} />
-        Shto Rresht
+        Shto Pjesë
       </button>
     </div>
   );

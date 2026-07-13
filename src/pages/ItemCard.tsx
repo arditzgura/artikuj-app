@@ -142,9 +142,9 @@ export default function ItemCard() {
             <table className="w-full min-w-[560px] text-left text-sm">
               <thead>
                 <tr className="bg-slate-50 text-xs font-semibold tracking-wide text-slate-500">
-                  <th className="px-4 py-2.5">Masa</th>
+                  <th className="px-4 py-2.5">Pjesa</th>
                   {item.tabelaMasave.columns.map((col) => (
-                    <th key={col.id} className="px-4 py-2.5">
+                    <th key={col.id} className="px-4 py-2.5 font-semibold text-blue-600">
                       {col.label || '—'}
                     </th>
                   ))}
@@ -153,7 +153,7 @@ export default function ItemCard() {
               <tbody>
                 {item.tabelaMasave.rows.map((row) => (
                   <tr key={row.id} className="border-t border-slate-100">
-                    <td className="px-4 py-2.5 font-semibold text-blue-600">{row.label || '—'}</td>
+                    <td className="px-4 py-2.5 font-semibold text-slate-700">{row.label || '—'}</td>
                     {item.tabelaMasave.columns.map((col) => (
                       <td key={col.id} className="px-4 py-2.5 text-slate-700">
                         {row.values[col.id] || '—'}
