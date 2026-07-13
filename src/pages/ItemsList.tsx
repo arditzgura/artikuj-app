@@ -130,11 +130,26 @@ export default function ItemsList() {
       const cards = Array.from(container.querySelectorAll<HTMLElement>(':scope > div'));
       const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
 
+      const margin = 12; // mm
+      const maxWidth = 210 - margin * 2;
+      const maxHeight = 297 - margin * 2;
+
       for (let i = 0; i < cards.length; i++) {
         const canvas = await html2canvas(cards[i], { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
         const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+        const imgRatio = canvas.width / canvas.height;
+        let renderWidth = maxWidth;
+        let renderHeight = renderWidth / imgRatio;
+        if (renderHeight > maxHeight) {
+          renderHeight = maxHeight;
+          renderWidth = renderHeight * imgRatio;
+        }
+        const x = (210 - renderWidth) / 2;
+        const y = (297 - renderHeight) / 2;
+
         if (i > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+        pdf.addImage(imgData, 'JPEG', x, y, renderWidth, renderHeight);
       }
 
       if (!cancelled) {
