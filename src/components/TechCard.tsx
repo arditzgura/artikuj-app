@@ -9,6 +9,19 @@ export function formatDate(iso: string) {
   return `${d}.${m}.${y}`;
 }
 
+function rowLetter(index: number) {
+  return String.fromCharCode(65 + (index % 26));
+}
+
+function FieldBox({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-lg border border-slate-200 p-3">
+      <p className="mb-1.5 text-[11px] font-semibold tracking-wide text-slate-400">{label}</p>
+      {children}
+    </div>
+  );
+}
+
 export default function TechCard({ item }: { item: Item }) {
   const imageUrl = useObjectUrl(item.imazhi);
   const sketchUrl = useObjectUrl(item.skicaTeknike);
@@ -31,20 +44,18 @@ export default function TechCard({ item }: { item: Item }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 border-t border-slate-100 p-8 md:grid-cols-3">
-        {/* Të dhëna kryesore */}
-        <div className="rounded-lg border border-dashed border-blue-300 bg-blue-50/30 p-4">
-          <p className="mb-3 text-xs font-semibold tracking-wide text-slate-400">TË DHËNA KRYESORE</p>
+      {/* Të dhënat kryesore */}
+      <div className="grid grid-cols-1 gap-3 border-t border-slate-100 px-8 pt-6 sm:grid-cols-3">
+        <FieldBox label="EMRI I ARTIKULLIT">
+          <p className="text-sm font-semibold text-slate-900">{item.emriArtikullit || '—'}</p>
+        </FieldBox>
 
-          <p className="text-[11px] font-semibold tracking-wide text-slate-400">EMRI I ARTIKULLIT</p>
-          <p className="mb-3 text-sm font-semibold text-slate-900">{item.emriArtikullit || '—'}</p>
-
-          <p className="text-[11px] font-semibold tracking-wide text-slate-400">NGJYRAT</p>
-          <div className="mb-3 space-y-1">
-            {item.ngjyrat.length === 0 ? (
-              <span className="text-sm text-slate-800">—</span>
-            ) : (
-              item.ngjyrat.map((color) => (
+        <FieldBox label="NGJYRAT">
+          {item.ngjyrat.length === 0 ? (
+            <span className="text-sm text-slate-800">—</span>
+          ) : (
+            <div className="space-y-1">
+              {item.ngjyrat.map((color) => (
                 <div key={color.id} className="flex items-center gap-2">
                   <span
                     className="h-3.5 w-3.5 shrink-0 rounded-full border border-slate-200"
@@ -52,18 +63,21 @@ export default function TechCard({ item }: { item: Item }) {
                   />
                   <span className="text-sm text-slate-800">{color.emri || '—'}</span>
                 </div>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
+        </FieldBox>
 
-          <p className="text-[11px] font-semibold tracking-wide text-slate-400">PËLHURA</p>
+        <FieldBox label="PËLHURA">
           <p className="text-sm text-slate-800">{item.pelhura || '—'}</p>
-        </div>
+        </FieldBox>
+      </div>
 
-        {/* Imazhi */}
+      {/* Pamje modeli + Skema */}
+      <div className="grid grid-cols-1 gap-5 px-8 pt-6 sm:grid-cols-2">
         <div className="rounded-lg border border-slate-200 p-4">
-          <p className="mb-3 text-xs font-semibold tracking-wide text-slate-400">IMAZHI I ARTIKULLIT</p>
-          <div className="flex aspect-square items-center justify-center overflow-hidden rounded-md bg-slate-50">
+          <p className="mb-3 text-xs font-semibold tracking-wide text-slate-400">PAMJE MODELI</p>
+          <div className="flex aspect-[3/4] items-center justify-center overflow-hidden rounded-md bg-slate-50">
             {imageUrl ? (
               <img src={imageUrl} alt={item.emriArtikullit} className="h-full w-full object-contain" />
             ) : (
@@ -72,12 +86,11 @@ export default function TechCard({ item }: { item: Item }) {
           </div>
         </div>
 
-        {/* Skica teknike */}
         <div className="rounded-lg border border-slate-200 p-4">
-          <p className="mb-3 text-xs font-semibold tracking-wide text-slate-400">SKICA TEKNIKE</p>
-          <div className="flex aspect-square items-center justify-center overflow-hidden rounded-md bg-slate-50">
+          <p className="mb-3 text-xs font-semibold tracking-wide text-slate-400">SKEMA</p>
+          <div className="flex aspect-[3/4] items-center justify-center overflow-hidden rounded-md bg-slate-50">
             {sketchUrl ? (
-              <img src={sketchUrl} alt="Skica teknike" className="h-full w-full object-contain" />
+              <img src={sketchUrl} alt="Skema" className="h-full w-full object-contain" />
             ) : (
               <ImageOff size={28} className="text-slate-300" />
             )}
@@ -85,14 +98,17 @@ export default function TechCard({ item }: { item: Item }) {
         </div>
       </div>
 
-      {/* Tabela e masave */}
-      <div className="border-t border-slate-100 px-8 py-6">
-        <p className="mb-3 text-xs font-semibold tracking-wide text-slate-400">TABELA E MASAVE (CM)</p>
+      {/* Përmasat */}
+      <div className="mt-6 px-8 pb-6">
+        <div className="mb-3 rounded-md bg-slate-800 px-3 py-1.5">
+          <p className="text-xs font-semibold tracking-wide text-white">PËRMASAT (CM)</p>
+        </div>
         <div className="overflow-x-auto rounded-lg border border-slate-200">
           <table className="w-full min-w-[560px] text-left text-sm">
             <thead>
               <tr className="bg-slate-50 text-xs font-semibold tracking-wide text-slate-500 print:bg-white">
-                <th className="px-4 py-2.5">Pjesa</th>
+                <th className="w-8 px-3 py-2.5"></th>
+                <th className="px-4 py-2.5">Shkallat e Masave</th>
                 {item.tabelaMasave.columns.map((col) => (
                   <th key={col.id} className="px-4 py-2.5 font-semibold text-blue-600">
                     {col.label || '—'}
@@ -101,8 +117,13 @@ export default function TechCard({ item }: { item: Item }) {
               </tr>
             </thead>
             <tbody>
-              {item.tabelaMasave.rows.map((row) => (
+              {item.tabelaMasave.rows.map((row, i) => (
                 <tr key={row.id} className="border-t border-slate-100">
+                  <td className="px-3 py-2.5">
+                    <span className="flex h-5 w-5 items-center justify-center rounded bg-slate-800 text-[11px] font-semibold text-white">
+                      {rowLetter(i)}
+                    </span>
+                  </td>
                   <td className="px-4 py-2.5 font-semibold text-slate-700">{row.label || '—'}</td>
                   {item.tabelaMasave.columns.map((col) => (
                     <td key={col.id} className="px-4 py-2.5 text-slate-700">
