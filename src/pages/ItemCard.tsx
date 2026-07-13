@@ -46,8 +46,8 @@ export default function ItemCard() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-8 py-8 print:p-0">
-      <div className="mb-4 flex items-center justify-between print:hidden">
+    <div className="min-h-full overflow-x-auto bg-slate-100 px-8 py-8 print:bg-white print:p-0">
+      <div className="mx-auto mb-4 flex w-[210mm] max-w-full items-center justify-between print:hidden">
         <Link to="/artikuj" className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800">
           <ArrowLeft size={16} />
           Artikuj

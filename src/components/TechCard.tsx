@@ -14,7 +14,7 @@ export default function TechCard({ item }: { item: Item }) {
   const sketchUrl = useObjectUrl(item.skicaTeknike);
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm print:rounded-none print:border-0 print:shadow-none">
+    <div className="mx-auto box-border w-[210mm] min-h-[297mm] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm print:m-0 print:w-full print:min-h-0 print:rounded-none print:border-0 print:shadow-none">
       {/* Header */}
       <div className="flex items-start justify-between bg-slate-50 px-8 py-6 print:bg-white">
         <div>

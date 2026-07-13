@@ -12,7 +12,7 @@ export default function PreviewModal({ item, onClose }: { item: Item; onClose: (
       onClick={onClose}
     >
       <div
-        className="w-full max-w-5xl"
+        className="w-[210mm] max-w-full"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-3 flex items-center justify-end gap-2">
