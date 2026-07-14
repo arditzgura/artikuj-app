@@ -12,6 +12,7 @@ import {
   Printer,
   Copy,
   Check,
+  Minus,
   BookImage,
   X,
 } from 'lucide-react';
@@ -175,6 +176,21 @@ export default function ItemsList() {
     );
   });
 
+  const allSelected = filtered.length > 0 && filtered.every((item) => selected.has(item.id));
+  const someSelected = filtered.some((item) => selected.has(item.id));
+
+  function toggleSelectAll() {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (allSelected) {
+        filtered.forEach((item) => next.delete(item.id));
+      } else {
+        filtered.forEach((item) => next.add(item.id));
+      }
+      return next;
+    });
+  }
+
   return (
     <div className="mx-auto max-w-6xl px-8 py-8 pb-28">
       <div className="mb-6 flex items-center justify-between">
@@ -217,7 +233,7 @@ export default function ItemsList() {
         </div>
       </div>
 
-      <div className="mb-6 flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2">
+      <div className="mb-4 flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2">
         <Search size={16} className="text-slate-400" />
         <input
           value={query}
@@ -226,6 +242,24 @@ export default function ItemsList() {
           className="w-full text-sm outline-none placeholder:text-slate-400"
         />
       </div>
+
+      {!loading && filtered.length > 0 && (
+        <div
+          onClick={toggleSelectAll}
+          className="mb-4 flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900"
+        >
+          <SelectCircle
+            checked={allSelected}
+            indeterminate={!allSelected && someSelected}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toggleSelectAll();
+            }}
+          />
+          Zgjidh të gjitha ({filtered.length})
+        </div>
+      )}
 
       {loading ? (
         <p className="text-sm text-slate-400">Duke ngarkuar...</p>
@@ -363,25 +397,28 @@ export default function ItemsList() {
 
 function SelectCircle({
   checked,
+  indeterminate = false,
   onClick,
   className = '',
 }: {
   checked: boolean;
+  indeterminate?: boolean;
   onClick: (e: React.MouseEvent) => void;
   className?: string;
 }) {
+  const filled = checked || indeterminate;
   return (
     <button
       type="button"
       onClick={onClick}
-      title={checked ? 'Hiq nga përzgjedhja' : 'Zgjidh për katalog'}
+      title={filled ? 'Hiq nga përzgjedhja' : 'Zgjidh për katalog'}
       className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-        checked
+        filled
           ? 'border-blue-600 bg-blue-600 text-white'
           : 'border-slate-300 bg-white text-transparent hover:border-blue-400'
       } ${className}`}
     >
-      <Check size={14} strokeWidth={3} />
+      {indeterminate ? <Minus size={14} strokeWidth={3} /> : <Check size={14} strokeWidth={3} />}
     </button>
   );
 }
