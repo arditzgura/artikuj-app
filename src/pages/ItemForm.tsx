@@ -15,7 +15,7 @@ import {
 import { useObjectUrl } from '../hooks/useObjectUrl';
 import SizeTableEditor from '../components/SizeTableEditor';
 import ColorSwatch from '../components/ColorSwatch';
-import { generateSketchBlob } from '../sketchTemplates';
+import { generateSketchBlob, SKETCH_CATEGORIES } from '../sketchTemplates';
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -51,7 +51,10 @@ export default function ItemForm() {
     getAllItems().then((items) => {
       const fabrics = new Set(items.map((i) => i.pelhura.trim()).filter(Boolean));
       setPelhuraSuggestions(Array.from(fabrics).sort());
-      const categories = new Set(items.map((i) => i.kategoria.trim()).filter(Boolean));
+      const categories = new Set([
+        ...SKETCH_CATEGORIES,
+        ...items.map((i) => i.kategoria.trim()).filter(Boolean),
+      ]);
       setKategoriaSuggestions(Array.from(categories).sort());
       const genders = new Set(items.map((i) => i.gjinia.trim()).filter(Boolean));
       setGjiniaSuggestions(Array.from(genders).sort());
