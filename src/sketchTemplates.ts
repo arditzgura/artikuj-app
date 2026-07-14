@@ -2,8 +2,12 @@ import { makeId, type SizeTableRow, type SizeTable } from './types';
 
 interface Anchor {
   keywords: string[]; // lowercase substrings matched against a row label
-  x: number;
-  y: number;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  labelX: number;
+  labelY: number;
 }
 
 interface SketchTemplate {
@@ -29,10 +33,10 @@ const MBATHJE: SketchTemplate = {
           fill="none" stroke="${STROKE}" stroke-width="1.4" stroke-dasharray="4 4" />
   `,
   anchors: [
-    { keywords: ['brez'], x: 150, y: 24 },
-    { keywords: ['gjatësia totale', 'gjatesia totale', 'gjatësia', 'total'], x: 44, y: 150 },
-    { keywords: ['hapja e këmbës', 'hapja e kembes', 'hapja'], x: 212, y: 150 },
-    { keywords: ['gusset', 'fundit'], x: 150, y: 268 },
+    { keywords: ['brez'], x1: 86, y1: 26, x2: 214, y2: 26, labelX: 150, labelY: 40 },
+    { keywords: ['gjatësia totale', 'gjatesia totale', 'gjatësia', 'total'], x1: 24, y1: 26, x2: 24, y2: 280, labelX: 14, labelY: 156 },
+    { keywords: ['hapja e këmbës', 'hapja e kembes', 'hapja'], x1: 200, y1: 112, x2: 226, y2: 158, labelX: 240, labelY: 138 },
+    { keywords: ['gusset', 'fundit'], x1: 120, y1: 270, x2: 180, y2: 270, labelX: 150, labelY: 285 },
   ],
   rows: ['Gjerësia e Brezit', 'Gjatësia Totale', 'Hapja e Këmbës', 'Gjerësia e Fundit (Gusset)'],
 };
@@ -48,10 +52,10 @@ const KANAJTERE: SketchTemplate = {
     <path d="M126,34 C132,52 140,62 150,62 C160,62 168,52 174,34" fill="none" stroke="${STROKE}" stroke-width="1.6" />
   `,
   anchors: [
-    { keywords: ['gjerësia e fundit', 'gjeresia e fundit', 'fundit'], x: 150, y: 290 },
-    { keywords: ['gjatësia anësore', 'gjatesia anesore', 'anësore', 'anesore'], x: 40, y: 200 },
-    { keywords: ['sqetull'], x: 224, y: 96 },
-    { keywords: ['sup'], x: 150, y: 18 },
+    { keywords: ['gjerësia e fundit', 'gjeresia e fundit', 'fundit'], x1: 70, y1: 312, x2: 230, y2: 312, labelX: 150, labelY: 327 },
+    { keywords: ['gjatësia anësore', 'gjatesia anesore', 'anësore', 'anesore'], x1: 20, y1: 20, x2: 20, y2: 300, labelX: 10, labelY: 162 },
+    { keywords: ['sqetull'], x1: 233, y1: 68, x2: 233, y2: 118, labelX: 249, labelY: 96 },
+    { keywords: ['sup'], x1: 108, y1: 4, x2: 140, y2: 4, labelX: 124, labelY: 17 },
   ],
   rows: ['Gjerësia e Fundit', 'Gjatësia Anësore', 'Harku i Sqetullës', 'Gjerësia e Supit'],
 };
@@ -66,11 +70,11 @@ const BLUZE: SketchTemplate = {
     <path d="M128,20 C134,36 140,44 150,44 C160,44 166,36 172,20" fill="none" stroke="${STROKE}" stroke-width="1.6" />
   `,
   anchors: [
-    { keywords: ['gjoks'], x: 150, y: 130 },
-    { keywords: ['gjatësia totale', 'gjatesia totale', 'total'], x: 34, y: 220 },
-    { keywords: ['mëngë', 'mengë', 'mengesi'], x: 240, y: 70 },
-    { keywords: ['sup'], x: 150, y: 24 },
-    { keywords: ['qaf'], x: 150, y: 44 },
+    { keywords: ['gjoks'], x1: 92, y1: 312, x2: 208, y2: 312, labelX: 150, labelY: 327 },
+    { keywords: ['gjatësia totale', 'gjatesia totale', 'total'], x1: 20, y1: 20, x2: 20, y2: 300, labelX: 10, labelY: 162 },
+    { keywords: ['mëngë', 'mengë', 'mengesi'], x1: 206, y1: 56, x2: 246, y2: 84, labelX: 258, labelY: 78 },
+    { keywords: ['sup'], x1: 118, y1: 8, x2: 182, y2: 8, labelX: 150, labelY: 20 },
+    { keywords: ['qaf'], x1: 134, y1: 26, x2: 166, y2: 26, labelX: 150, labelY: 40 },
   ],
   rows: [
     'Gjerësia e Gjoksit (1/2)',
@@ -92,12 +96,12 @@ const BLUZE_MENGE_GJATE: SketchTemplate = {
     <path d="M210,120 L236,150 L236,220 L210,220" fill="none" stroke="${STROKE}" stroke-width="2" />
   `,
   anchors: [
-    { keywords: ['gjoks'], x: 150, y: 130 },
-    { keywords: ['gjatësia totale', 'gjatesia totale', 'total'], x: 30, y: 220 },
-    { keywords: ['mëngë', 'mengë', 'mengesi'], x: 250, y: 150 },
-    { keywords: ['sup'], x: 150, y: 30 },
-    { keywords: ['qaf'], x: 150, y: 44 },
-    { keywords: ['manshet', 'mansheta'], x: 64, y: 220 },
+    { keywords: ['gjoks'], x1: 90, y1: 312, x2: 210, y2: 312, labelX: 150, labelY: 327 },
+    { keywords: ['gjatësia totale', 'gjatesia totale', 'total'], x1: 20, y1: 16, x2: 20, y2: 300, labelX: 10, labelY: 160 },
+    { keywords: ['mëngë', 'mengë', 'mengesi'], x1: 210, y1: 60, x2: 246, y2: 140, labelX: 258, labelY: 105 },
+    { keywords: ['sup'], x1: 120, y1: 6, x2: 180, y2: 6, labelX: 150, labelY: 18 },
+    { keywords: ['qaf'], x1: 134, y1: 26, x2: 166, y2: 26, labelX: 150, labelY: 40 },
+    { keywords: ['manshet', 'mansheta'], x1: 218, y1: 208, x2: 240, y2: 228, labelX: 252, labelY: 224 },
   ],
   rows: [
     'Gjoksi (1/2)',
@@ -120,11 +124,11 @@ const BOKSE: SketchTemplate = {
     <path d="M224,20 L228,60" fill="none" stroke="${STROKE}" stroke-width="2" />
   `,
   anchors: [
-    { keywords: ['brez'], x: 150, y: 30 },
-    { keywords: ['gjatësia anësore', 'gjatesia anesore', 'anësore', 'anesore'], x: 40, y: 110 },
-    { keywords: ['inseam', 'gjatësia e këmbës', 'gjatesia e kembes'], x: 150, y: 150 },
-    { keywords: ['hapja e këmbës', 'hapja e kembes'], x: 190, y: 190 },
-    { keywords: ['rise', 'hapi'], x: 150, y: 95 },
+    { keywords: ['brez'], x1: 86, y1: 12, x2: 214, y2: 12, labelX: 150, labelY: 24 },
+    { keywords: ['gjatësia anësore', 'gjatesia anesore', 'anësore', 'anesore'], x1: 20, y1: 20, x2: 20, y2: 195, labelX: 10, labelY: 112 },
+    { keywords: ['inseam', 'gjatësia e këmbës', 'gjatesia e kembes'], x1: 150, y1: 92, x2: 150, y2: 195, labelX: 164, labelY: 148 },
+    { keywords: ['hapja e këmbës', 'hapja e kembes'], x1: 168, y1: 192, x2: 204, y2: 200, labelX: 216, labelY: 210 },
+    { keywords: ['rise', 'hapi'], x1: 150, y1: 20, x2: 150, y2: 88, labelX: 164, labelY: 58 },
   ],
   rows: ['Gjerësia e Brezit', 'Gjatësia Anësore', 'Gjatësia e Këmbës (Inseam)', 'Hapja e Këmbës', 'Hapi (Rise)'],
 };
@@ -141,11 +145,11 @@ const KANAJTERE_E_GJATE: SketchTemplate = {
     <path d="M70,175 L230,175" fill="none" stroke="${STROKE}" stroke-width="1" stroke-dasharray="3 3" />
   `,
   anchors: [
-    { keywords: ['gjoks'], x: 150, y: 118 },
-    { keywords: ['gjatësia totale', 'gjatesia totale', 'total'], x: 40, y: 260 },
-    { keywords: ['sqetull'], x: 224, y: 96 },
-    { keywords: ['sup'], x: 150, y: 18 },
-    { keywords: ['gjerësia e fundit', 'gjeresia e fundit', 'fundit'], x: 150, y: 300 },
+    { keywords: ['gjoks'], x1: 70, y1: 118, x2: 230, y2: 118, labelX: 150, labelY: 106 },
+    { keywords: ['gjatësia totale', 'gjatesia totale', 'total'], x1: 20, y1: 12, x2: 20, y2: 320, labelX: 10, labelY: 168 },
+    { keywords: ['sqetull'], x1: 233, y1: 68, x2: 233, y2: 118, labelX: 249, labelY: 96 },
+    { keywords: ['sup'], x1: 108, y1: 4, x2: 140, y2: 4, labelX: 124, labelY: 17 },
+    { keywords: ['gjerësia e fundit', 'gjeresia e fundit', 'fundit'], x1: 46, y1: 330, x2: 254, y2: 330, labelX: 150, labelY: 325 },
   ],
   rows: ['Gjoksi (1/2)', 'Gjatësia Totale', 'Sqetulla', 'Supi', 'Gjerësia e Fundit'],
 };
@@ -161,11 +165,11 @@ const BENEVREK: SketchTemplate = {
     <path d="M224,20 L228,60" fill="none" stroke="${STROKE}" stroke-width="2" />
   `,
   anchors: [
-    { keywords: ['brez'], x: 150, y: 24 },
-    { keywords: ['gjatësia totale', 'gjatesia totale', 'total'], x: 40, y: 180 },
-    { keywords: ['inseam', 'gjatësia e këmbës', 'gjatesia e kembes'], x: 150, y: 150 },
-    { keywords: ['kofsh'], x: 150, y: 68 },
-    { keywords: ['kyç', 'kyc', 'hapja e fundit'], x: 150, y: 295 },
+    { keywords: ['brez'], x1: 86, y1: 10, x2: 214, y2: 10, labelX: 150, labelY: 22 },
+    { keywords: ['gjatësia totale', 'gjatesia totale', 'total'], x1: 20, y1: 20, x2: 20, y2: 296, labelX: 10, labelY: 160 },
+    { keywords: ['inseam', 'gjatësia e këmbës', 'gjatesia e kembes'], x1: 150, y1: 96, x2: 150, y2: 290, labelX: 164, labelY: 196 },
+    { keywords: ['kofsh'], x1: 76, y1: 64, x2: 224, y2: 64, labelX: 150, labelY: 78 },
+    { keywords: ['kyç', 'kyc', 'hapja e fundit'], x1: 160, y1: 292, x2: 200, y2: 300, labelX: 214, labelY: 297 },
   ],
   rows: ['Gjerësia e Brezit', 'Gjatësia Totale', 'Gjatësia e Këmbës (Inseam)', 'Gjerësia e Kofshës', 'Hapja e Fundit (Kyçi)'],
 };
@@ -178,11 +182,11 @@ const DEFAULT_TEMPLATE: SketchTemplate = {
     <path d="M120,30 C126,44 136,52 150,52 C164,52 174,44 180,30" fill="none" stroke="${STROKE}" stroke-width="1.6" />
   `,
   anchors: [
-    { keywords: ['sup'], x: 150, y: 34 },
-    { keywords: ['gjoks', 'gjerësia gjithësej', 'gjeresia gjithesej'], x: 150, y: 150 },
-    { keywords: ['mëngë', 'mengë', 'mengesi', 'krah'], x: 224, y: 100 },
-    { keywords: ['gjatësi', 'gjatesi'], x: 46, y: 220 },
-    { keywords: ['bel'], x: 150, y: 260 },
+    { keywords: ['sup'], x1: 118, y1: 12, x2: 182, y2: 12, labelX: 150, labelY: 24 },
+    { keywords: ['gjoks', 'gjerësia gjithësej', 'gjeresia gjithesej'], x1: 70, y1: 312, x2: 230, y2: 312, labelX: 150, labelY: 327 },
+    { keywords: ['mëngë', 'mengë', 'mengesi', 'krah'], x1: 234, y1: 80, x2: 234, y2: 130, labelX: 250, labelY: 108 },
+    { keywords: ['gjatësi', 'gjatesi'], x1: 20, y1: 30, x2: 20, y2: 300, labelX: 10, labelY: 168 },
+    { keywords: ['bel'], x1: 100, y1: 175, x2: 200, y2: 175, labelX: 150, labelY: 190 },
   ],
   rows: [],
 };
@@ -225,12 +229,31 @@ function rowLetter(index: number) {
   return String.fromCharCode(65 + (index % 26));
 }
 
-function badge(x: number, y: number, letter: string) {
+// Draws a straight dimension line with small open arrowheads at both ends,
+// matching the hand-drawn technical-sketch convention (arrows along the
+// garment edges rather than badges on top of the fabric).
+function arrowLine(x1: number, y1: number, x2: number, y2: number): string {
+  const angle = Math.atan2(y2 - y1, x2 - x1);
+  const headLen = 6;
+  const headAngle = Math.PI / 7;
+  const head = (x: number, y: number, dir: number) => {
+    const ax = x - headLen * Math.cos(dir - headAngle);
+    const ay = y - headLen * Math.sin(dir - headAngle);
+    const bx = x - headLen * Math.cos(dir + headAngle);
+    const by = y - headLen * Math.sin(dir + headAngle);
+    return `M${x},${y} L${ax},${ay} M${x},${y} L${bx},${by}`;
+  };
   return `
-    <g>
-      <rect x="${x - 11}" y="${y - 11}" width="22" height="22" rx="5" fill="#1e293b" />
-      <text x="${x}" y="${y + 5}" text-anchor="middle" font-family="ui-monospace, monospace" font-size="14" font-weight="700" fill="#ffffff">${letter}</text>
-    </g>
+    <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${STROKE}" stroke-width="1.3" />
+    <path d="${head(x1, y1, angle + Math.PI)}" stroke="${STROKE}" stroke-width="1.3" fill="none" stroke-linecap="round" />
+    <path d="${head(x2, y2, angle)}" stroke="${STROKE}" stroke-width="1.3" fill="none" stroke-linecap="round" />
+  `;
+}
+
+function anchorMarkup(anchor: Anchor, letter: string): string {
+  return `
+    ${arrowLine(anchor.x1, anchor.y1, anchor.x2, anchor.y2)}
+    <text x="${anchor.labelX}" y="${anchor.labelY}" text-anchor="middle" font-family="ui-monospace, monospace" font-size="13" font-weight="700" fill="${STROKE}">${letter}</text>
   `;
 }
 
@@ -247,7 +270,7 @@ function matchAnchor(label: string, anchors: Anchor[], used: Set<Anchor>): Ancho
 export function generateSketchSvg(kategoria: string, rows: SizeTableRow[]): string {
   const template = pickTemplate(kategoria);
   const used = new Set<Anchor>();
-  const badges: string[] = [];
+  const marks: string[] = [];
   const legend: { letter: string; label: string }[] = [];
 
   rows.forEach((row, i) => {
@@ -255,7 +278,7 @@ export function generateSketchSvg(kategoria: string, rows: SizeTableRow[]): stri
     const anchor = matchAnchor(row.label, template.anchors, used);
     if (anchor) {
       used.add(anchor);
-      badges.push(badge(anchor.x, anchor.y, letter));
+      marks.push(anchorMarkup(anchor, letter));
     } else {
       legend.push({ letter, label: row.label || `Masa ${letter}` });
     }
@@ -272,7 +295,7 @@ export function generateSketchSvg(kategoria: string, rows: SizeTableRow[]): stri
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${VIEW_W} ${VIEW_H}">
     <rect x="0" y="0" width="${VIEW_W}" height="${VIEW_H}" fill="#ffffff" />
     ${template.outline}
-    ${badges.join('')}
+    ${marks.join('')}
     ${legendSvg}
   </svg>`;
 }
