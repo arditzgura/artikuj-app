@@ -172,7 +172,9 @@ export default function ItemsList() {
       item.emriArtikullit.toLowerCase().includes(q) ||
       item.kodi.toLowerCase().includes(q) ||
       item.ngjyrat.some((c) => c.emri.toLowerCase().includes(q)) ||
-      item.pelhura.toLowerCase().includes(q)
+      item.pelhura.toLowerCase().includes(q) ||
+      item.kategoria.toLowerCase().includes(q) ||
+      item.gjinia.toLowerCase().includes(q)
     );
   });
 
@@ -238,7 +240,7 @@ export default function ItemsList() {
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Kërko sipas emrit, kodit, ngjyrës ose pëlhurës..."
+          placeholder="Kërko sipas emrit, kodit, kategorisë, gjinisë, ngjyrës ose pëlhurës..."
           className="w-full text-sm outline-none placeholder:text-slate-400"
         />
       </div>

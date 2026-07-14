@@ -27,6 +27,10 @@ export default function ItemForm() {
 
   const [kodi, setKodi] = useState('');
   const [data, setData] = useState(todayIso());
+  const [kategoria, setKategoria] = useState('');
+  const [gjinia, setGjinia] = useState('');
+  const [kategoriaSuggestions, setKategoriaSuggestions] = useState<string[]>([]);
+  const [gjiniaSuggestions, setGjiniaSuggestions] = useState<string[]>([]);
   const [emriArtikullit, setEmriArtikullit] = useState('');
   const [ngjyrat, setNgjyrat] = useState<ColorEntry[]>([]);
   const [pelhura, setPelhura] = useState('');
@@ -46,6 +50,10 @@ export default function ItemForm() {
     getAllItems().then((items) => {
       const fabrics = new Set(items.map((i) => i.pelhura.trim()).filter(Boolean));
       setPelhuraSuggestions(Array.from(fabrics).sort());
+      const categories = new Set(items.map((i) => i.kategoria.trim()).filter(Boolean));
+      setKategoriaSuggestions(Array.from(categories).sort());
+      const genders = new Set(items.map((i) => i.gjinia.trim()).filter(Boolean));
+      setGjiniaSuggestions(Array.from(genders).sort());
 
       if (!isEdit) {
         setKodi(`ART-${String(items.length + 1).padStart(4, '0')}`);
@@ -57,6 +65,8 @@ export default function ItemForm() {
         if (item) {
           setKodi(item.kodi);
           setData(item.data);
+          setKategoria(item.kategoria);
+          setGjinia(item.gjinia);
           setEmriArtikullit(item.emriArtikullit);
           setNgjyrat(item.ngjyrat);
           setPelhura(item.pelhura);
@@ -102,6 +112,8 @@ export default function ItemForm() {
       id: id ?? uuidv4(),
       kodi,
       data,
+      kategoria,
+      gjinia,
       emriArtikullit,
       ngjyrat,
       pelhura,
@@ -153,6 +165,34 @@ export default function ItemForm() {
               className="input"
               required
             />
+          </Field>
+          <Field label="Kategoria">
+            <input
+              value={kategoria}
+              onChange={(e) => setKategoria(e.target.value)}
+              className="input"
+              placeholder="p.sh. Këmisha"
+              list="kategoria-suggestions"
+            />
+            <datalist id="kategoria-suggestions">
+              {kategoriaSuggestions.map((k) => (
+                <option key={k} value={k} />
+              ))}
+            </datalist>
+          </Field>
+          <Field label="Gjinia">
+            <input
+              value={gjinia}
+              onChange={(e) => setGjinia(e.target.value)}
+              className="input"
+              placeholder="p.sh. Meshkuj"
+              list="gjinia-suggestions"
+            />
+            <datalist id="gjinia-suggestions">
+              {gjiniaSuggestions.map((g) => (
+                <option key={g} value={g} />
+              ))}
+            </datalist>
           </Field>
           <Field label="Emri i Artikullit" full>
             <input

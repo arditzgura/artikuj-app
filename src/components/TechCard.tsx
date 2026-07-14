@@ -51,6 +51,14 @@ export default function TechCard({ item }: { item: Item }) {
           <p className="text-sm font-semibold text-slate-900">{item.emriArtikullit || '—'}</p>
         </FieldBox>
 
+        <FieldBox label="KATEGORIA">
+          <p className="text-sm text-slate-800">{item.kategoria || '—'}</p>
+        </FieldBox>
+
+        <FieldBox label="GJINIA">
+          <p className="text-sm text-slate-800">{item.gjinia || '—'}</p>
+        </FieldBox>
+
         <FieldBox label="NGJYRAT">
           {item.ngjyrat.length === 0 ? (
             <span className="text-sm text-slate-800">—</span>

@@ -25,6 +25,8 @@ export interface Item {
   id: string;
   kodi: string;
   data: string;
+  kategoria: string;
+  gjinia: string;
   emriArtikullit: string;
   ngjyrat: ColorEntry[];
   pelhura: string;
@@ -131,5 +133,7 @@ export function normalizeItem(raw: Item): Item {
     ...raw,
     tabelaMasave: migrateSizeTable(raw.tabelaMasave),
     ngjyrat: migrateColors(raw),
+    kategoria: raw.kategoria ?? '',
+    gjinia: raw.gjinia ?? '',
   };
 }
