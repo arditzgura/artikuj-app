@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Shirt, PackagePlus } from 'lucide-react';
+import { LayoutDashboard, Shirt, Settings } from 'lucide-react';
 
 const navItems = [
   { to: '/', label: 'Paneli', icon: LayoutDashboard, end: true },
@@ -39,13 +39,17 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="mt-auto px-3 pb-5">
+      <div className="mt-auto border-t border-slate-100 px-3 py-3">
         <NavLink
-          to="/artikuj/ri"
-          className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-3 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
+          to="/cilesimet"
+          className={({ isActive }) =>
+            `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+              isActive ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'
+            }`
+          }
         >
-          <PackagePlus size={18} />
-          Artikull i Ri
+          <Settings size={18} />
+          Cilësimet
         </NavLink>
       </div>
     </aside>
