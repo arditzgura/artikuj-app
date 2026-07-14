@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
-import { ArrowLeft, ImageOff, Plus, Save, Upload, X } from 'lucide-react';
+import { ArrowLeft, ImageOff, Plus, RefreshCw, Save, Upload, X } from 'lucide-react';
 import { getAllItems, getItem, saveItem } from '../db';
 import {
   defaultSizeTable,
@@ -15,6 +15,7 @@ import {
 import { useObjectUrl } from '../hooks/useObjectUrl';
 import SizeTableEditor from '../components/SizeTableEditor';
 import ColorSwatch from '../components/ColorSwatch';
+import { generateSketchBlob } from '../sketchTemplates';
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -103,6 +104,17 @@ export default function ItemForm() {
 
   const presetNames = new Set(PRESET_COLORS.map((p) => p.emri.toLowerCase()));
   const manualColors = ngjyrat.filter((c) => !presetNames.has(c.emri.trim().toLowerCase()));
+
+  function regenerateSketch() {
+    setSkicaTeknike(generateSketchBlob(kategoria, tabelaMasave.rows));
+  }
+
+  function handleImazhiChange(file: Blob | undefined) {
+    setImazhi(file);
+    if (file && !skicaTeknike) {
+      regenerateSketch();
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -285,12 +297,22 @@ export default function ItemForm() {
           <ImageField
             label="Imazhi i Artikullit"
             url={imageUrl}
-            onChange={setImazhi}
+            onChange={handleImazhiChange}
           />
           <ImageField
             label="Skica Teknike"
             url={sketchUrl}
             onChange={setSkicaTeknike}
+            action={
+              <button
+                type="button"
+                onClick={regenerateSketch}
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 px-3 py-2 text-sm text-slate-500 hover:border-blue-400 hover:text-blue-600"
+              >
+                <RefreshCw size={14} />
+                Gjenero Skemën Automatikisht
+              </button>
+            }
           />
         </div>
 
@@ -356,10 +378,12 @@ function ImageField({
   label,
   url,
   onChange,
+  action,
 }: {
   label: string;
   url: string | null;
   onChange: (blob: Blob | undefined) => void;
+  action?: React.ReactNode;
 }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-6">
@@ -400,6 +424,7 @@ function ImageField({
           Hiq imazhin
         </button>
       )}
+      {action}
     </div>
   );
 }
