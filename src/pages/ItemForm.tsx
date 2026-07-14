@@ -15,7 +15,7 @@ import {
 import { useObjectUrl } from '../hooks/useObjectUrl';
 import SizeTableEditor from '../components/SizeTableEditor';
 import ColorSwatch from '../components/ColorSwatch';
-import { generateSketchBlob, SKETCH_CATEGORIES } from '../sketchTemplates';
+import { applyRecommendedRows, generateSketchBlob, getRecommendedRows, SKETCH_CATEGORIES } from '../sketchTemplates';
 
 function todayIso() {
   return new Date().toISOString().slice(0, 10);
@@ -118,6 +118,12 @@ export default function ItemForm() {
       regenerateSketch();
     }
   }
+
+  function useRecommendedRows() {
+    setTabelaMasave((table) => applyRecommendedRows(kategoria, table));
+  }
+
+  const recommendedRows = getRecommendedRows(kategoria);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -320,9 +326,21 @@ export default function ItemForm() {
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-white p-6">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-400">
-            Tabela e Masave (cm)
-          </p>
+          <div className="mb-4 flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+              Tabela e Masave (cm)
+            </p>
+            {recommendedRows && (
+              <button
+                type="button"
+                onClick={useRecommendedRows}
+                className="flex items-center gap-1 rounded-lg border border-dashed border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-500 hover:border-blue-400 hover:text-blue-600"
+              >
+                <RefreshCw size={13} />
+                Përdor Rreshtat Standardë ({kategoria})
+              </button>
+            )}
+          </div>
           <SizeTableEditor table={tabelaMasave} onChange={setTabelaMasave} />
 
           <div className="mt-4">

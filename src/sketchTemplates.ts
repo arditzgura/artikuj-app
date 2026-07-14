@@ -1,19 +1,45 @@
-import type { SizeTableRow } from './types';
+import { makeId, type SizeTableRow, type SizeTable } from './types';
 
-type AnchorKey = 'supi' | 'gjoksi' | 'mengesia' | 'gjatesia' | 'beli';
+interface Anchor {
+  keywords: string[]; // lowercase substrings matched against a row label
+  x: number;
+  y: number;
+}
 
 interface SketchTemplate {
+  name: string;
   match: (kategoriaLower: string) => boolean;
   outline: string; // inner SVG markup (paths/lines) for the garment outline
-  anchors: Record<AnchorKey, { x: number; y: number }>;
+  anchors: Anchor[];
+  rows: string[]; // recommended measurement row labels, in A/B/C... order
 }
 
 const VIEW_W = 300;
 const VIEW_H = 340;
 const STROKE = '#1f2937';
 
-const TANK_TOP: SketchTemplate = {
-  match: (k) => k.includes('fanell') || (k.includes('bluz') && k.includes('pa mëngë')),
+const MBATHJE: SketchTemplate = {
+  name: 'Mbathje',
+  match: (k) => k.includes('mbathje') || k.includes('brief') || k.includes('slip'),
+  outline: `
+    <path d="M70,40 C70,28 96,20 150,20 C204,20 230,28 230,40 L226,128
+             C224,180 200,240 150,282 C100,240 76,180 74,128 Z"
+          fill="none" stroke="${STROKE}" stroke-width="2.5" stroke-linejoin="round" />
+    <path d="M74,128 C92,150 116,160 150,160 C184,160 208,150 226,128"
+          fill="none" stroke="${STROKE}" stroke-width="1.4" stroke-dasharray="4 4" />
+  `,
+  anchors: [
+    { keywords: ['brez'], x: 150, y: 24 },
+    { keywords: ['gjatësia totale', 'gjatesia totale', 'gjatësia', 'total'], x: 44, y: 150 },
+    { keywords: ['hapja e këmbës', 'hapja e kembes', 'hapja'], x: 212, y: 150 },
+    { keywords: ['gusset', 'fundit'], x: 150, y: 268 },
+  ],
+  rows: ['Gjerësia e Brezit', 'Gjatësia Totale', 'Hapja e Këmbës', 'Gjerësia e Fundit (Gusset)'],
+};
+
+const KANAJTERE: SketchTemplate = {
+  name: 'Kanajtere',
+  match: (k) => k === 'kanajtere' || (k.includes('kanajtere') && !k.includes('gjatë') && !k.includes('gjate')),
   outline: `
     <path d="M108,12 L100,46 C86,60 74,80 70,112 L66,300 L118,300 L118,150 L182,150 L182,300 L234,300 L230,112
              C226,80 214,60 200,46 L192,12
@@ -21,134 +47,91 @@ const TANK_TOP: SketchTemplate = {
           fill="none" stroke="${STROKE}" stroke-width="2.5" stroke-linejoin="round" />
     <path d="M126,34 C132,52 140,62 150,62 C160,62 168,52 174,34" fill="none" stroke="${STROKE}" stroke-width="1.6" />
   `,
-  anchors: {
-    supi: { x: 150, y: 18 },
-    gjoksi: { x: 150, y: 118 },
-    mengesia: { x: 224, y: 96 },
-    beli: { x: 150, y: 210 },
-    gjatesia: { x: 40, y: 260 },
-  },
+  anchors: [
+    { keywords: ['gjerësia e fundit', 'gjeresia e fundit', 'fundit'], x: 150, y: 290 },
+    { keywords: ['gjatësia anësore', 'gjatesia anesore', 'anësore', 'anesore'], x: 40, y: 200 },
+    { keywords: ['sqetull'], x: 224, y: 96 },
+    { keywords: ['sup'], x: 150, y: 18 },
+  ],
+  rows: ['Gjerësia e Fundit', 'Gjatësia Anësore', 'Harku i Sqetullës', 'Gjerësia e Supit'],
 };
 
-const HOODIE: SketchTemplate = {
-  match: (k) => k.includes('kapuç') || k.includes('kapuc') || k.includes('hoodie'),
-  outline: `
-    <path d="M114,22 C110,6 128,2 150,2 C172,2 190,6 186,22" fill="none" stroke="${STROKE}" stroke-width="2" />
-    <path d="M120,20 L62,44 L40,96 L72,112 L90,80 L90,300 L210,300 L210,80 L228,112 L260,96 L238,44 L180,20
-             L150,48 L120,20 Z"
-          fill="none" stroke="${STROKE}" stroke-width="2.5" stroke-linejoin="round" />
-    <path d="M138,22 L134,58" fill="none" stroke="${STROKE}" stroke-width="1.4" />
-    <path d="M162,22 L166,58" fill="none" stroke="${STROKE}" stroke-width="1.4" />
-    <rect x="118" y="185" width="64" height="32" rx="4" fill="none" stroke="${STROKE}" stroke-width="1.4" />
-    <path d="M90,220 L90,260" fill="none" stroke="${STROKE}" stroke-width="2" />
-    <path d="M210,220 L210,260" fill="none" stroke="${STROKE}" stroke-width="2" />
-  `,
-  anchors: {
-    supi: { x: 150, y: 12 },
-    gjoksi: { x: 150, y: 140 },
-    mengesia: { x: 246, y: 100 },
-    beli: { x: 150, y: 230 },
-    gjatesia: { x: 28, y: 220 },
-  },
-};
-
-const TSHIRT: SketchTemplate = {
-  match: (k) => k.includes('bluz') || k.includes('t-shirt') || k.includes('tshirt') || k.includes('t shirt'),
+const BLUZE: SketchTemplate = {
+  name: 'Bluzë (mëngë të shkurtra)',
+  match: (k) => (k.includes('bluz') && !k.includes('gjatë') && !k.includes('gjate')) || k === 'bluze',
   outline: `
     <path d="M118,20 L60,44 L44,90 L76,104 L92,72 L92,300 L208,300 L208,72 L224,104 L256,90 L240,44 L182,20
              C176,32 164,40 150,40 C136,40 124,32 118,20 Z"
           fill="none" stroke="${STROKE}" stroke-width="2.5" stroke-linejoin="round" />
     <path d="M128,20 C134,36 140,44 150,44 C160,44 166,36 172,20" fill="none" stroke="${STROKE}" stroke-width="1.6" />
   `,
-  anchors: {
-    supi: { x: 150, y: 24 },
-    gjoksi: { x: 150, y: 130 },
-    mengesia: { x: 240, y: 70 },
-    beli: { x: 150, y: 220 },
-    gjatesia: { x: 34, y: 220 },
-  },
+  anchors: [
+    { keywords: ['gjoks'], x: 150, y: 130 },
+    { keywords: ['gjatësia totale', 'gjatesia totale', 'total'], x: 34, y: 220 },
+    { keywords: ['mëngë', 'mengë', 'mengesi'], x: 240, y: 70 },
+    { keywords: ['sup'], x: 150, y: 24 },
+    { keywords: ['qaf'], x: 150, y: 44 },
+  ],
+  rows: [
+    'Gjerësia e Gjoksit (1/2)',
+    'Gjatësia Totale',
+    'Gjatësia e Mëngës',
+    'Gjerësia e Supave',
+    'Hapja e Qafës',
+  ],
 };
 
-const SHIRT: SketchTemplate = {
-  match: (k) => k.includes('këmish') || k.includes('kemish') || k.includes('shirt'),
+const BLUZE_MENGE_GJATE: SketchTemplate = {
+  name: 'Bluzë mëngë e gjatë',
+  match: (k) => k.includes('mëngë e gjatë') || k.includes('mengе gjate') || k.includes('mengë gjatë') || (k.includes('bluz') && (k.includes('gjatë') || k.includes('gjate'))),
   outline: `
     <path d="M120,16 L62,40 L40,92 L72,108 L90,76 L90,300 L210,300 L210,76 L228,108 L260,92 L238,40 L180,16
              L150,44 L120,16 Z"
           fill="none" stroke="${STROKE}" stroke-width="2.5" stroke-linejoin="round" />
-    <path d="M150,44 L150,300" fill="none" stroke="${STROKE}" stroke-width="1.2" stroke-dasharray="4 4" />
-    <path d="M120,16 L108,60 L138,50 Z" fill="none" stroke="${STROKE}" stroke-width="1.6" />
-    <path d="M180,16 L192,60 L162,50 Z" fill="none" stroke="${STROKE}" stroke-width="1.6" />
     <path d="M90,120 L64,150 L64,220 L90,220" fill="none" stroke="${STROKE}" stroke-width="2" />
     <path d="M210,120 L236,150 L236,220 L210,220" fill="none" stroke="${STROKE}" stroke-width="2" />
   `,
-  anchors: {
-    supi: { x: 150, y: 30 },
-    gjoksi: { x: 150, y: 130 },
-    mengesia: { x: 250, y: 150 },
-    beli: { x: 150, y: 220 },
-    gjatesia: { x: 30, y: 220 },
-  },
+  anchors: [
+    { keywords: ['gjoks'], x: 150, y: 130 },
+    { keywords: ['gjatësia totale', 'gjatesia totale', 'total'], x: 30, y: 220 },
+    { keywords: ['mëngë', 'mengë', 'mengesi'], x: 250, y: 150 },
+    { keywords: ['sup'], x: 150, y: 30 },
+    { keywords: ['qaf'], x: 150, y: 44 },
+    { keywords: ['manshet', 'mansheta'], x: 64, y: 220 },
+  ],
+  rows: [
+    'Gjoksi (1/2)',
+    'Gjatësia Totale',
+    'Gjatësia e Mëngës',
+    'Supet',
+    'Qafa',
+    'Gjerësia e Manshetës',
+  ],
 };
 
-const JACKET: SketchTemplate = {
-  match: (k) => k.includes('xhaket') || k.includes('jacket') || k.includes('kapardaj'),
+const BOKSE: SketchTemplate = {
+  name: 'Bokse',
+  match: (k) => k.includes('bokse') || k.includes('boxer'),
   outline: `
-    <path d="M120,16 L62,40 L40,92 L72,108 L90,76 L90,300 L210,300 L210,76 L228,108 L260,92 L238,40 L180,16
-             L150,44 L120,16 Z"
-          fill="none" stroke="${STROKE}" stroke-width="2.5" stroke-linejoin="round" />
-    <path d="M120,16 L100,66 L140,52 Z" fill="none" stroke="${STROKE}" stroke-width="1.6" />
-    <path d="M180,16 L200,66 L160,52 Z" fill="none" stroke="${STROKE}" stroke-width="1.6" />
-    <rect x="106" y="112" width="30" height="10" fill="none" stroke="${STROKE}" stroke-width="1.4" />
-    <path d="M84,196 L112,196" fill="none" stroke="${STROKE}" stroke-width="1.6" />
-    <path d="M188,196 L216,196" fill="none" stroke="${STROKE}" stroke-width="1.6" />
-    <path d="M90,120 L64,150 L64,220 L90,220" fill="none" stroke="${STROKE}" stroke-width="2" />
-    <path d="M210,120 L236,150 L236,220 L210,220" fill="none" stroke="${STROKE}" stroke-width="2" />
-  `,
-  anchors: {
-    supi: { x: 150, y: 26 },
-    gjoksi: { x: 150, y: 130 },
-    mengesia: { x: 250, y: 150 },
-    beli: { x: 150, y: 220 },
-    gjatesia: { x: 30, y: 220 },
-  },
-};
-
-const PANTS: SketchTemplate = {
-  match: (k) => k.includes('pantallon') || k.includes('pants') || k.includes('trouser'),
-  outline: `
-    <path d="M76,20 L224,20 L228,60 L152,60 L152,90 L200,300 L160,300 L150,120 L140,300 L100,300 L148,90
+    <path d="M76,20 L224,20 L228,60 L152,60 L152,85 L206,200 L164,200 L150,110 L136,200 L94,200 L148,85
              L148,60 L72,60 Z"
           fill="none" stroke="${STROKE}" stroke-width="2.5" stroke-linejoin="round" />
     <path d="M76,20 L72,60" fill="none" stroke="${STROKE}" stroke-width="2" />
     <path d="M224,20 L228,60" fill="none" stroke="${STROKE}" stroke-width="2" />
   `,
-  anchors: {
-    supi: { x: 150, y: 12 },
-    gjoksi: { x: 150, y: 70 },
-    mengesia: { x: 200, y: 180 },
-    beli: { x: 150, y: 34 },
-    gjatesia: { x: 40, y: 200 },
-  },
+  anchors: [
+    { keywords: ['brez'], x: 150, y: 30 },
+    { keywords: ['gjatësia anësore', 'gjatesia anesore', 'anësore', 'anesore'], x: 40, y: 110 },
+    { keywords: ['inseam', 'gjatësia e këmbës', 'gjatesia e kembes'], x: 150, y: 150 },
+    { keywords: ['hapja e këmbës', 'hapja e kembes'], x: 190, y: 190 },
+    { keywords: ['rise', 'hapi'], x: 150, y: 95 },
+  ],
+  rows: ['Gjerësia e Brezit', 'Gjatësia Anësore', 'Gjatësia e Këmbës (Inseam)', 'Hapja e Këmbës', 'Hapi (Rise)'],
 };
 
-const SKIRT: SketchTemplate = {
-  match: (k) => k.includes('fund') || k.includes('skirt'),
-  outline: `
-    <rect x="118" y="20" width="64" height="14" rx="2" fill="none" stroke="${STROKE}" stroke-width="2" />
-    <path d="M118,34 L182,34 L226,290 L74,290 Z" fill="none" stroke="${STROKE}" stroke-width="2.5" stroke-linejoin="round" />
-    <path d="M150,34 L150,290" fill="none" stroke="${STROKE}" stroke-width="1" stroke-dasharray="4 4" />
-  `,
-  anchors: {
-    supi: { x: 150, y: 14 },
-    gjoksi: { x: 150, y: 120 },
-    mengesia: { x: 216, y: 150 },
-    beli: { x: 150, y: 27 },
-    gjatesia: { x: 40, y: 200 },
-  },
-};
-
-const DRESS: SketchTemplate = {
-  match: (k) => k.includes('fustan') || k.includes('dress') || k.includes('rrobë') || k.includes('robe'),
+const KANAJTERE_E_GJATE: SketchTemplate = {
+  name: 'Kanajtere e gjatë (night dress)',
+  match: (k) => k.includes('night dress') || (k.includes('kanajtere') && (k.includes('gjatë') || k.includes('gjate'))),
   outline: `
     <path d="M108,12 L100,46 C86,60 74,80 70,112 L74,175 L46,320 L254,320 L226,175 L230,112
              C226,80 214,60 200,46 L192,12
@@ -157,42 +140,64 @@ const DRESS: SketchTemplate = {
     <path d="M126,34 C132,52 140,62 150,62 C160,62 168,52 174,34" fill="none" stroke="${STROKE}" stroke-width="1.6" />
     <path d="M70,175 L230,175" fill="none" stroke="${STROKE}" stroke-width="1" stroke-dasharray="3 3" />
   `,
-  anchors: {
-    supi: { x: 150, y: 18 },
-    gjoksi: { x: 150, y: 118 },
-    mengesia: { x: 224, y: 96 },
-    beli: { x: 150, y: 178 },
-    gjatesia: { x: 40, y: 260 },
-  },
+  anchors: [
+    { keywords: ['gjoks'], x: 150, y: 118 },
+    { keywords: ['gjatësia totale', 'gjatesia totale', 'total'], x: 40, y: 260 },
+    { keywords: ['sqetull'], x: 224, y: 96 },
+    { keywords: ['sup'], x: 150, y: 18 },
+    { keywords: ['gjerësia e fundit', 'gjeresia e fundit', 'fundit'], x: 150, y: 300 },
+  ],
+  rows: ['Gjoksi (1/2)', 'Gjatësia Totale', 'Sqetulla', 'Supi', 'Gjerësia e Fundit'],
+};
+
+const BENEVREK: SketchTemplate = {
+  name: 'Benevrek (long johns)',
+  match: (k) => k.includes('benevrek') || k.includes('long john'),
+  outline: `
+    <path d="M76,20 L224,20 L228,60 L152,60 L152,90 L200,300 L160,300 L150,120 L140,300 L100,300 L148,90
+             L148,60 L72,60 Z"
+          fill="none" stroke="${STROKE}" stroke-width="2.5" stroke-linejoin="round" />
+    <path d="M76,20 L72,60" fill="none" stroke="${STROKE}" stroke-width="2" />
+    <path d="M224,20 L228,60" fill="none" stroke="${STROKE}" stroke-width="2" />
+  `,
+  anchors: [
+    { keywords: ['brez'], x: 150, y: 24 },
+    { keywords: ['gjatësia totale', 'gjatesia totale', 'total'], x: 40, y: 180 },
+    { keywords: ['inseam', 'gjatësia e këmbës', 'gjatesia e kembes'], x: 150, y: 150 },
+    { keywords: ['kofsh'], x: 150, y: 68 },
+    { keywords: ['kyç', 'kyc', 'hapja e fundit'], x: 150, y: 295 },
+  ],
+  rows: ['Gjerësia e Brezit', 'Gjatësia Totale', 'Gjatësia e Këmbës (Inseam)', 'Gjerësia e Kofshës', 'Hapja e Fundit (Kyçi)'],
 };
 
 const DEFAULT_TEMPLATE: SketchTemplate = {
+  name: 'Gjenerik',
   match: () => true,
   outline: `
     <rect x="70" y="30" width="160" height="270" rx="18" fill="none" stroke="${STROKE}" stroke-width="2.5" />
     <path d="M120,30 C126,44 136,52 150,52 C164,52 174,44 180,30" fill="none" stroke="${STROKE}" stroke-width="1.6" />
   `,
-  anchors: {
-    supi: { x: 150, y: 34 },
-    gjoksi: { x: 150, y: 150 },
-    mengesia: { x: 224, y: 100 },
-    beli: { x: 150, y: 220 },
-    gjatesia: { x: 46, y: 200 },
-  },
+  anchors: [
+    { keywords: ['sup'], x: 150, y: 34 },
+    { keywords: ['gjoks', 'gjerësia gjithësej', 'gjeresia gjithesej'], x: 150, y: 150 },
+    { keywords: ['mëngë', 'mengë', 'mengesi', 'krah'], x: 224, y: 100 },
+    { keywords: ['gjatësi', 'gjatesi'], x: 46, y: 220 },
+    { keywords: ['bel'], x: 150, y: 260 },
+  ],
+  rows: [],
 };
 
-const TEMPLATES: SketchTemplate[] = [TANK_TOP, HOODIE, TSHIRT, SHIRT, JACKET, PANTS, SKIRT, DRESS];
-
-export const SKETCH_CATEGORIES = [
-  'Fanellë',
-  'Bluzë me Kapuç',
-  'Bluzë / T-Shirt',
-  'Këmishë',
-  'Xhaketë',
-  'Pantallona',
-  'Fund',
-  'Fustan',
+const TEMPLATES: SketchTemplate[] = [
+  MBATHJE,
+  KANAJTERE_E_GJATE,
+  KANAJTERE,
+  BLUZE_MENGE_GJATE,
+  BLUZE,
+  BOKSE,
+  BENEVREK,
 ];
+
+export const SKETCH_CATEGORIES = TEMPLATES.map((t) => t.name);
 
 function pickTemplate(kategoria: string): SketchTemplate {
   const k = kategoria.trim().toLowerCase();
@@ -200,14 +205,20 @@ function pickTemplate(kategoria: string): SketchTemplate {
   return TEMPLATES.find((t) => t.match(k)) ?? DEFAULT_TEMPLATE;
 }
 
-function matchAnchorKey(label: string): AnchorKey | null {
-  const l = label.trim().toLowerCase();
-  if (l.includes('bel')) return 'beli';
-  if (l.includes('gjatësi') || l.includes('gjatesi')) return 'gjatesia';
-  if (l.includes('gjoks') || l.includes('gjerësia gjithësej') || l.includes('gjeresia gjithesej')) return 'gjoksi';
-  if (l.includes('sup')) return 'supi';
-  if (l.includes('mëngë') || l.includes('mengë') || l.includes('mengesi') || l.includes('krah')) return 'mengesia';
-  return null;
+export function getRecommendedRows(kategoria: string): string[] | null {
+  const template = pickTemplate(kategoria);
+  return template.rows.length > 0 ? template.rows : null;
+}
+
+export function applyRecommendedRows(kategoria: string, table: SizeTable): SizeTable {
+  const labels = getRecommendedRows(kategoria);
+  if (!labels) return table;
+  const rows: SizeTableRow[] = labels.map((label) => ({
+    id: makeId(),
+    label,
+    values: Object.fromEntries(table.columns.map((c) => [c.id, ''])),
+  }));
+  return { ...table, rows };
 }
 
 function rowLetter(index: number) {
@@ -223,19 +234,28 @@ function badge(x: number, y: number, letter: string) {
   `;
 }
 
+function matchAnchor(label: string, anchors: Anchor[], used: Set<Anchor>): Anchor | null {
+  const l = label.trim().toLowerCase();
+  if (!l) return null;
+  for (const anchor of anchors) {
+    if (used.has(anchor)) continue;
+    if (anchor.keywords.some((kw) => l.includes(kw))) return anchor;
+  }
+  return null;
+}
+
 export function generateSketchSvg(kategoria: string, rows: SizeTableRow[]): string {
   const template = pickTemplate(kategoria);
-  const usedAnchors = new Set<AnchorKey>();
+  const used = new Set<Anchor>();
   const badges: string[] = [];
   const legend: { letter: string; label: string }[] = [];
 
   rows.forEach((row, i) => {
     const letter = rowLetter(i);
-    const anchorKey = matchAnchorKey(row.label);
-    if (anchorKey && !usedAnchors.has(anchorKey)) {
-      usedAnchors.add(anchorKey);
-      const { x, y } = template.anchors[anchorKey];
-      badges.push(badge(x, y, letter));
+    const anchor = matchAnchor(row.label, template.anchors, used);
+    if (anchor) {
+      used.add(anchor);
+      badges.push(badge(anchor.x, anchor.y, letter));
     } else {
       legend.push({ letter, label: row.label || `Masa ${letter}` });
     }
