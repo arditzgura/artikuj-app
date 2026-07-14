@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Boxes, Palette, Ruler, PackagePlus } from 'lucide-react';
+import { Boxes, Palette, Ruler, PackagePlus, Tags, Users, X } from 'lucide-react';
 import { getAllItems } from '../db';
 import type { Item } from '../types';
 import ItemThumb from '../components/ItemThumb';
+import FilterSelect from '../components/FilterSelect';
 
 export default function Dashboard() {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filterKategoria, setFilterKategoria] = useState('');
+  const [filterGjinia, setFilterGjinia] = useState('');
 
   useEffect(() => {
     getAllItems()
@@ -19,12 +22,21 @@ export default function Dashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  const totalItems = items.length;
-  const uniqueFabrics = new Set(items.map((i) => i.pelhura).filter(Boolean)).size;
+  const kategoriOptions = Array.from(new Set(items.map((i) => i.kategoria.trim()).filter(Boolean))).sort();
+  const gjiniOptions = Array.from(new Set(items.map((i) => i.gjinia.trim()).filter(Boolean))).sort();
+
+  const filtered = items.filter((item) => {
+    const matchesKategoria = !filterKategoria || item.kategoria === filterKategoria;
+    const matchesGjinia = !filterGjinia || item.gjinia === filterGjinia;
+    return matchesKategoria && matchesGjinia;
+  });
+
+  const totalItems = filtered.length;
+  const uniqueFabrics = new Set(filtered.map((i) => i.pelhura).filter(Boolean)).size;
   const uniqueColors = new Set(
-    items.flatMap((i) => i.ngjyrat.map((c) => c.emri)).filter(Boolean),
+    filtered.flatMap((i) => i.ngjyrat.map((c) => c.emri)).filter(Boolean),
   ).size;
-  const recent = items.slice(0, 6);
+  const recent = filtered.slice(0, 6);
 
   return (
     <div className="mx-auto max-w-6xl px-8 py-8">
@@ -40,6 +52,35 @@ export default function Dashboard() {
           <PackagePlus size={16} />
           Artikull i Ri
         </Link>
+      </div>
+
+      <div className="mb-6 flex flex-wrap items-center gap-2">
+        <FilterSelect
+          icon={<Tags size={14} />}
+          value={filterKategoria}
+          onChange={setFilterKategoria}
+          allLabel="Të gjitha Kategoritë"
+          options={kategoriOptions}
+        />
+        <FilterSelect
+          icon={<Users size={14} />}
+          value={filterGjinia}
+          onChange={setFilterGjinia}
+          allLabel="Të gjitha Gjinitë"
+          options={gjiniOptions}
+        />
+        {(filterKategoria || filterGjinia) && (
+          <button
+            onClick={() => {
+              setFilterKategoria('');
+              setFilterGjinia('');
+            }}
+            className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-100"
+          >
+            <X size={13} />
+            Pastro filtrat
+          </button>
+        )}
       </div>
 
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -58,13 +99,17 @@ export default function Dashboard() {
         ) : recent.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
             <Boxes size={32} className="text-slate-300" />
-            <p className="text-sm text-slate-500">Nuk ka ende artikuj të ruajtur.</p>
-            <Link
-              to="/artikuj/ri"
-              className="text-sm font-medium text-blue-600 hover:underline"
-            >
-              Shto artikullin e parë
-            </Link>
+            <p className="text-sm text-slate-500">
+              {items.length === 0 ? 'Nuk ka ende artikuj të ruajtur.' : 'Asnjë artikull nuk përputhet me filtrin.'}
+            </p>
+            {items.length === 0 && (
+              <Link
+                to="/artikuj/ri"
+                className="text-sm font-medium text-blue-600 hover:underline"
+              >
+                Shto artikullin e parë
+              </Link>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">

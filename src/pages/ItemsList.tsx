@@ -14,6 +14,8 @@ import {
   Check,
   Minus,
   BookImage,
+  Tags,
+  Users,
   X,
 } from 'lucide-react';
 import { deleteItem, getAllItems, saveItem } from '../db';
@@ -22,6 +24,7 @@ import ItemThumb from '../components/ItemThumb';
 import PreviewModal from '../components/PreviewModal';
 import ColorSwatch from '../components/ColorSwatch';
 import TechCard from '../components/TechCard';
+import FilterSelect from '../components/FilterSelect';
 
 type ViewMode = 'grid' | 'list';
 const VIEW_MODE_KEY = 'artikuj-view-mode';
@@ -31,6 +34,8 @@ export default function ItemsList() {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
+  const [filterKategoria, setFilterKategoria] = useState('');
+  const [filterGjinia, setFilterGjinia] = useState('');
   const [previewItem, setPreviewItem] = useState<Item | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<ViewMode>(
@@ -165,17 +170,22 @@ export default function ItemsList() {
     };
   }, [exportItems]);
 
+  const kategoriOptions = Array.from(new Set(items.map((i) => i.kategoria.trim()).filter(Boolean))).sort();
+  const gjiniOptions = Array.from(new Set(items.map((i) => i.gjinia.trim()).filter(Boolean))).sort();
+
   const filtered = items.filter((item) => {
     const q = query.trim().toLowerCase();
-    if (!q) return true;
-    return (
+    const matchesQuery =
+      !q ||
       item.emriArtikullit.toLowerCase().includes(q) ||
       item.kodi.toLowerCase().includes(q) ||
       item.ngjyrat.some((c) => c.emri.toLowerCase().includes(q)) ||
       item.pelhura.toLowerCase().includes(q) ||
       item.kategoria.toLowerCase().includes(q) ||
-      item.gjinia.toLowerCase().includes(q)
-    );
+      item.gjinia.toLowerCase().includes(q);
+    const matchesKategoria = !filterKategoria || item.kategoria === filterKategoria;
+    const matchesGjinia = !filterGjinia || item.gjinia === filterGjinia;
+    return matchesQuery && matchesKategoria && matchesGjinia;
   });
 
   const allSelected = filtered.length > 0 && filtered.every((item) => selected.has(item.id));
@@ -243,6 +253,35 @@ export default function ItemsList() {
           placeholder="Kërko sipas emrit, kodit, kategorisë, gjinisë, ngjyrës ose pëlhurës..."
           className="w-full text-sm outline-none placeholder:text-slate-400"
         />
+      </div>
+
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <FilterSelect
+          icon={<Tags size={14} />}
+          value={filterKategoria}
+          onChange={setFilterKategoria}
+          allLabel="Të gjitha Kategoritë"
+          options={kategoriOptions}
+        />
+        <FilterSelect
+          icon={<Users size={14} />}
+          value={filterGjinia}
+          onChange={setFilterGjinia}
+          allLabel="Të gjitha Gjinitë"
+          options={gjiniOptions}
+        />
+        {(filterKategoria || filterGjinia) && (
+          <button
+            onClick={() => {
+              setFilterKategoria('');
+              setFilterGjinia('');
+            }}
+            className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-100"
+          >
+            <X size={13} />
+            Pastro filtrat
+          </button>
+        )}
       </div>
 
       {!loading && filtered.length > 0 && (
